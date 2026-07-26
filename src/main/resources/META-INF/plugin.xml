@@ -1,0 +1,59 @@
+<idea-plugin>
+    <id>io.github.vadimtoptunov.kassi-testdata</id>
+    <name>Kassi Test Data</name>
+    <vendor email="vtoptunov88@gmail.com" url="https://github.com/vadimtoptunov">Vadim Toptunov</vendor>
+
+    <description><![CDATA[
+    <h2>Kassi Test Data — valid banking &amp; KYC test data, generated offline</h2>
+    <p>
+    Generic faker tools produce <em>plausible-looking</em> data. This plugin produces
+    <b>spec-valid</b> data that actually passes a real validator — plus the deliberately
+    <b>invalid</b> variant you need to test rejection paths. Built for QA and mobile/fintech
+    engineers working on banking and KYC flows.
+    </p>
+    <ul>
+      <li><b>IBAN</b> for every European country — correct ISO 13616 length and a passing ISO 7064 mod-97 check, with an invalid-checksum variant.</li>
+      <li><b>Card (PAN)</b> — Luhn-valid, from payment-gateway <i>test</i> BIN ranges only (never real issuable cards), with CVV and expiry, plus a Luhn-invalid variant.</li>
+      <li><b>BIC/SWIFT</b> (ISO 9362), <b>National IDs</b> (NL BSN, DE Personalausweis, AU TFN, GB NINo, CY), and <b>VAT / ABN</b> tax identifiers — each with its real checksum.</li>
+      <li><b>Coherent personas</b> — name, date of birth, address, bank and tax identifiers, all consistent for one person and country. Optional seed for reproducible fixtures.</li>
+    </ul>
+    <p>
+    100% offline and algorithmic. Zero network, zero scraping, zero real PII — everything is
+    synthetic data for testing, not real identities. Every generator is covered by a unit test
+    that asserts the valid output passes the real algorithm and the invalid variant fails it.
+    </p>
+    <p><b>Usage:</b> right-click in the editor (or Tools ▸ Insert Test Data), search, pick, and it inserts at the caret.</p>
+    ]]></description>
+
+    <change-notes><![CDATA[
+    <h3>1.0.0</h3>
+    <ul>
+      <li>Initial release: IBAN, Card, BIC, National ID, Tax/VAT and coherent Persona generators.</li>
+      <li>IBAN, BIC, Card and Persona cover all European countries plus Australia; National ID and VAT ship real checksums for CY/DE/NL/GB/AU.</li>
+      <li>Valid and invalid variants for bank identifiers and cards. Optional seed for reproducible output.</li>
+    </ul>
+    ]]></change-notes>
+
+    <!-- Platform-only plugin: loads in IntelliJ IDEA, Android Studio and other IntelliJ-based IDEs. -->
+    <depends>com.intellij.modules.platform</depends>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <!-- KassiSettings is registered via its @Service annotation; only the settings UI is declared here. -->
+        <applicationConfigurable
+                parentId="tools"
+                instance="io.github.vadimtoptunov.kassitestdata.settings.KassiSettingsConfigurable"
+                id="io.github.vadimtoptunov.kassitestdata.settings.KassiSettingsConfigurable"
+                displayName="Kassi Test Data"/>
+    </extensions>
+
+    <actions>
+        <action id="io.github.vadimtoptunov.kassitestdata.InsertTestData"
+                class="io.github.vadimtoptunov.kassitestdata.action.InsertTestDataAction"
+                text="Insert Test Data…"
+                description="Insert valid (or invalid) banking / KYC test data at the caret">
+            <add-to-group group-id="EditorPopupMenu" anchor="last"/>
+            <add-to-group group-id="ToolsMenu" anchor="last"/>
+            <add-to-group group-id="GenerateGroup" anchor="last"/>
+        </action>
+    </actions>
+</idea-plugin>
