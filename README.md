@@ -67,6 +67,11 @@ verified in tests by an *independent* `BigInteger` mod-97 implementation, so the
 
 See [PUBLISHING.md](PUBLISHING.md) for the Marketplace submission steps.
 
+## Roadmap
+
+Full product plan (v1.0 shipped → MRZ → full-Europe checksums → PDF417/AAMVA → paid tier →
+ecosystem tie-ins) is in [ROADMAP.md](ROADMAP.md).
+
 ## License
 
 MIT — see [LICENSE](LICENSE).
