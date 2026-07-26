@@ -35,7 +35,7 @@ class InsertTestDataAction : AnAction() {
             .createPopupChooserBuilder(items)
             .setTitle("Insert Test Data")
             .setNamerForFiltering { it.searchText }
-            .setRenderer(SimpleListCellRenderer.create<CatalogItem>("") { it.label })
+            .setRenderer(SimpleListCellRenderer.create<CatalogItem> { label, value, _ -> label.text = value.label })
             .setItemChosenCallback { item ->
                 val seed = KassiSettings.getInstance().seedOrNull()
                 val text = item.produce(seed)
