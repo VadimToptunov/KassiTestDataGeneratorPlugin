@@ -1,7 +1,7 @@
 <idea-plugin>
     <id>io.github.vadimtoptunov.kassi-testdata</id>
     <name>Kassi Test Data</name>
-    <vendor email="vtoptunov88@gmail.com" url="https://github.com/vadimtoptunov">Vadim Toptunov</vendor>
+    <vendor email="vtoptunov88@gmail.com" url="https://github.com/VadimToptunov/KassiTestDataGeneratorPlugin">Vadim Toptunov</vendor>
 
     <description><![CDATA[
     <h2>Kassi Test Data — valid banking &amp; KYC test data, generated offline</h2>
@@ -23,6 +23,7 @@
     that asserts the valid output passes the real algorithm and the invalid variant fails it.
     </p>
     <p><b>Usage:</b> right-click in the editor (or Tools ▸ Insert Test Data), search, pick, and it inserts at the caret.</p>
+    <p><b>Source, issues &amp; docs:</b> <a href="https://github.com/VadimToptunov/KassiTestDataGeneratorPlugin">github.com/VadimToptunov/KassiTestDataGeneratorPlugin</a></p>
     ]]></description>
 
     <change-notes><![CDATA[
