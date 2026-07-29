@@ -2,11 +2,8 @@
 
 [![Build](https://github.com/VadimToptunov/KassiTestDataGeneratorPlugin/actions/workflows/build.yml/badge.svg)](https://github.com/VadimToptunov/KassiTestDataGeneratorPlugin/actions/workflows/build.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-<!-- JetBrains Marketplace badges — after the first listing, replace <ID> with the numeric plugin id
-     from the plugin's Marketplace URL (plugins.jetbrains.com/plugin/<ID>-...), then uncomment:
-[![Version](https://img.shields.io/jetbrains/plugin/v/<ID>.svg?label=Marketplace)](https://plugins.jetbrains.com/plugin/<ID>)
-[![Downloads](https://img.shields.io/jetbrains/plugin/d/<ID>.svg)](https://plugins.jetbrains.com/plugin/<ID>)
--->
+[![Version](https://img.shields.io/jetbrains/plugin/v/33149.svg?label=Marketplace)](https://plugins.jetbrains.com/plugin/33149-kassi-test-data)
+[![Downloads](https://img.shields.io/jetbrains/plugin/d/33149.svg)](https://plugins.jetbrains.com/plugin/33149-kassi-test-data)
 
 A JetBrains / Android Studio plugin that generates **spec-valid** banking and KYC test data —
 data that actually passes a real validator — plus the deliberately **invalid** variants you need
