@@ -34,6 +34,9 @@ jobs:
       - name: Verify plugin
         run: ./gradlew verifyPlugin --stacktrace
 
+      - name: Check for deprecated / scheduled-for-removal API
+        run: ./gradlew runPluginVerifier --stacktrace
+
       - name: Build plugin
         run: ./gradlew buildPlugin --stacktrace
 
