@@ -1,3 +1,5 @@
+import org.jetbrains.intellij.tasks.RunPluginVerifierTask.FailureLevel
+
 plugins {
     id("java")
     id("org.jetbrains.kotlin.jvm") version "1.9.23"
@@ -52,5 +54,19 @@ tasks {
 
     publishPlugin {
         token.set(System.getenv("PUBLISH_TOKEN"))
+    }
+
+    // Release gate: fail the build (and therefore the publish) if the plugin uses API that is
+    // scheduled for removal or is otherwise incompatible — checked against the oldest supported
+    // and a recent IDE. Run via `./gradlew runPluginVerifier` before publishing.
+    runPluginVerifier {
+        ideVersions.set(listOf("IC-232.10335.12", "IC-252.28539.13"))
+        failureLevel.set(
+            listOf(
+                FailureLevel.COMPATIBILITY_PROBLEMS,
+                FailureLevel.INVALID_PLUGIN,
+                FailureLevel.SCHEDULED_FOR_REMOVAL_API_USAGES,
+            )
+        )
     }
 }

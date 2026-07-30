@@ -49,6 +49,10 @@ jobs:
       - name: Build plugin
         run: ./gradlew buildPlugin -PpluginVersion=${{ steps.ver.outputs.version }} --stacktrace
 
+      # Gate: fails the release before publishing if any API is scheduled for removal / incompatible.
+      - name: Verify plugin (blocks publish on scheduled-for-removal API)
+        run: ./gradlew runPluginVerifier -PpluginVersion=${{ steps.ver.outputs.version }} --stacktrace
+
       - name: Publish to JetBrains Marketplace
         env:
           PUBLISH_TOKEN: ${{ secrets.PUBLISH_TOKEN }}
