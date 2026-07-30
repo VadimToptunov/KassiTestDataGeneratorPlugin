@@ -72,6 +72,11 @@ object TestDataCatalog {
             }
         }
 
+        // 5b. LEI — Legal Entity Identifier (ISO 17442), country-agnostic business ID.
+        items += CatalogItem("Business", "LEI · Legal Entity Identifier (ISO 17442)") { seed ->
+            LeiGenerator.generate(Rng(seed), valid = true)
+        }
+
         // 6. Persona — coherent bundle, every country.
         for (country in Country.entries.sortedBy { it.displayName }) {
             items += CatalogItem("Persona", "Persona (${country.code}) · ${country.displayName}") { seed ->

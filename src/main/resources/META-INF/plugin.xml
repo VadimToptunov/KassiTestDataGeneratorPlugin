@@ -27,6 +27,12 @@
     ]]></description>
 
     <change-notes><![CDATA[
+    <h3>1.2.0</h3>
+    <ul>
+      <li>More real, tested checksums: national IDs for <b>Spain</b> (DNI/NIE), <b>Portugal</b> (NIF) and <b>Poland</b> (PESEL — encodes date of birth &amp; sex, kept consistent with the persona).</li>
+      <li>VAT for <b>Poland</b> (NIP), <b>Italy</b> (Partita IVA), <b>Belgium</b> and <b>Portugal</b>.</li>
+      <li>New <b>LEI</b> (Legal Entity Identifier, ISO 17442) generator for KYB/business data.</li>
+    </ul>
     <h3>1.0.1</h3>
     <ul>
       <li>Internal: switched to the current (non-deprecated) list-renderer API for forward compatibility. No functional changes.</li>

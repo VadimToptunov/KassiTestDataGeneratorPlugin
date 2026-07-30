@@ -1,6 +1,7 @@
 package io.github.vadimtoptunov.kassitestdata.generators
 
 import io.github.vadimtoptunov.kassitestdata.algo.Checksums
+import io.github.vadimtoptunov.kassitestdata.algo.EuIdChecksums
 import io.github.vadimtoptunov.kassitestdata.core.Country
 import io.github.vadimtoptunov.kassitestdata.core.Rng
 
@@ -19,6 +20,10 @@ object TaxIdGenerator {
         Country.NL to Scheme("VAT (BTW)"),
         Country.GB to Scheme("VAT"),
         Country.AU to Scheme("ABN"),
+        Country.PL to Scheme("VAT (NIP)"),
+        Country.IT to Scheme("VAT (P.IVA)"),
+        Country.BE to Scheme("VAT (BTW/TVA)"),
+        Country.PT to Scheme("VAT (NIF)"),
     )
 
     /** Full identifier as presented (with country prefix for VAT). */
@@ -28,7 +33,51 @@ object TaxIdGenerator {
         Country.NL -> "NL" + netherlandsVatBody(rng, valid)
         Country.GB -> "GB" + ukVatBody(rng, valid)
         Country.AU -> abnFormatted(rng, valid)
+        Country.PL -> "PL" + polishNip(rng, valid)
+        Country.IT -> "IT" + italianVat(rng, valid)
+        Country.BE -> "BE" + belgianVat(rng, valid)
+        Country.PT -> "PT" + portugueseVat(rng, valid)
         else -> throw IllegalArgumentException("No tax scheme for ${country.code} in v1")
+    }
+
+    // --- PL NIP: 10 digits, weighted mod 11 ---
+    fun polishNip(rng: Rng, valid: Boolean): String {
+        while (true) {
+            val first9 = rng.digitsNonZeroLead(9)
+            val check = EuIdChecksums.nipCheckDigit(first9) ?: continue
+            return if (valid) first9 + check else first9 + ((check + 1) % 10)
+        }
+    }
+
+    // --- IT Partita IVA: 11 digits, Luhn ---
+    fun italianVat(rng: Rng, valid: Boolean): String {
+        val first10 = rng.digitsNonZeroLead(10)
+        val check = Checksums.luhnCheckDigit(first10)
+        return if (valid) first10 + check else first10 + ((check + 1) % 10)
+    }
+
+    // --- BE VAT: 10 digits, mod 97 (enterprise number leads with 0 or 1) ---
+    fun belgianVat(rng: Rng, valid: Boolean): String {
+        while (true) {
+            val first8 = (if (rng.boolean()) "0" else "1") + rng.digits(7)
+            if (first8.toInt() % 97 == 0) continue
+            val check = EuIdChecksums.belgianVatCheck(first8).toString().padStart(2, '0')
+            if (valid) return first8 + check
+            var c = check.toInt()
+            var body: String
+            do {
+                c = (c + 1) % 100
+                body = first8 + c.toString().padStart(2, '0')
+            } while (EuIdChecksums.isValidBelgianVat(body))
+            return body
+        }
+    }
+
+    // --- PT VAT = NIF (9 digits, mod 11) ---
+    fun portugueseVat(rng: Rng, valid: Boolean): String {
+        val first8 = rng.digitsNonZeroLead(8)
+        val check = EuIdChecksums.portugueseNifCheckDigit(first8)
+        return if (valid) first8 + check else first8 + ((check + 1) % 10)
     }
 
     // --- CY VAT: 8 digits + check letter ---

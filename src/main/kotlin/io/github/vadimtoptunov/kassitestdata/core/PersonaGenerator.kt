@@ -87,7 +87,9 @@ object PersonaGenerator {
         val bic = BicGenerator.bic(country, rng)
 
         val nationalScheme = NationalIdGenerator.supported[country]
-        val nationalId = nationalScheme?.let { NationalIdGenerator.generate(country, rng, valid = true) }
+        val nationalId = nationalScheme?.let {
+            NationalIdGenerator.generate(country, rng, valid = true, birth = dob, gender = gender)
+        }
         val nationalLabel = nationalScheme?.let { "${it.label}:" }
 
         val taxScheme = TaxIdGenerator.supported[country]
