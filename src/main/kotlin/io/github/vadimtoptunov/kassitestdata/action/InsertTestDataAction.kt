@@ -12,6 +12,7 @@ import com.intellij.ui.SimpleListCellRenderer
 import io.github.vadimtoptunov.kassitestdata.generators.CatalogItem
 import io.github.vadimtoptunov.kassitestdata.generators.TestDataCatalog
 import io.github.vadimtoptunov.kassitestdata.settings.KassiSettings
+import javax.swing.JList
 
 /**
  * The single entry point: "Insert Test Data". Opens a searchable popup of every generator ×
@@ -35,7 +36,11 @@ class InsertTestDataAction : AnAction() {
             .createPopupChooserBuilder(items)
             .setTitle("Insert Test Data")
             .setNamerForFiltering { it.searchText }
-            .setRenderer(SimpleListCellRenderer.create<CatalogItem> { label, value, _ -> label.text = value.label })
+            .setRenderer(object : SimpleListCellRenderer<CatalogItem>() {
+                override fun customize(list: JList<out CatalogItem>, value: CatalogItem?, index: Int, selected: Boolean, hasFocus: Boolean) {
+                    text = value?.label.orEmpty()
+                }
+            })
             .setItemChosenCallback { item ->
                 val seed = KassiSettings.getInstance().seedOrNull()
                 val text = item.produce(seed)

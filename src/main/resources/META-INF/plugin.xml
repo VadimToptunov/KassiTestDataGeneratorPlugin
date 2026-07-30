@@ -27,6 +27,10 @@
     ]]></description>
 
     <change-notes><![CDATA[
+    <h3>1.2.1</h3>
+    <ul>
+      <li>Internal: replaced a list-renderer API scheduled for removal with the stable base class. No functional changes.</li>
+    </ul>
     <h3>1.2.0</h3>
     <ul>
       <li>More real, tested checksums: national IDs for <b>Spain</b> (DNI/NIE), <b>Portugal</b> (NIF) and <b>Poland</b> (PESEL — encodes date of birth &amp; sex, kept consistent with the persona).</li>
