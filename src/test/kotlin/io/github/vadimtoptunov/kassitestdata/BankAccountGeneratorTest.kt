@@ -65,4 +65,14 @@ class BankAccountGeneratorTest {
     fun `Australia has no IBAN spec (forces the abstraction)`() {
         assertFalse(IbanRegistry.supportedCountries.contains(Country.AU))
     }
+
+    @Test
+    fun `IBAN coverage spans the worldwide registry`() {
+        val codes = IbanRegistry.supportedCountries.map { it.code }.toSet()
+        assertTrue(codes.size >= 85, "expected worldwide IBAN coverage, got ${codes.size}")
+        // a spread of non-European registry members
+        for (code in listOf("TR", "SA", "AE", "IL", "BR", "PK", "EG", "XK")) {
+            assertTrue(code in codes, "missing IBAN country $code")
+        }
+    }
 }
