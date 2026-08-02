@@ -88,7 +88,9 @@ object PersonaGenerator {
 
         val nationalScheme = NationalIdGenerator.supported[country]
         val nationalId = nationalScheme?.let {
-            NationalIdGenerator.generate(country, rng, valid = true, birth = dob, gender = gender)
+            NationalIdGenerator.generate(
+                country, rng, valid = true, birth = dob, gender = gender, surname = last, givenName = first,
+            )
         }
         val nationalLabel = nationalScheme?.let { "${it.label}:" }
 

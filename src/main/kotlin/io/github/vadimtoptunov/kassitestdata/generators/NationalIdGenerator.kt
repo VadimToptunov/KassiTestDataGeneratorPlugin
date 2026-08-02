@@ -32,6 +32,7 @@ object NationalIdGenerator {
         Country.SE to Scheme("Personnummer", Validation.CHECKSUM),
         Country.FI to Scheme("HETU", Validation.CHECKSUM),
         Country.NO to Scheme("Fødselsnummer", Validation.CHECKSUM),
+        Country.IT to Scheme("Codice Fiscale", Validation.CHECKSUM),
     )
 
     /**
@@ -44,6 +45,8 @@ object NationalIdGenerator {
         valid: Boolean = true,
         birth: LocalDate? = null,
         gender: Gender? = null,
+        surname: String? = null,
+        givenName: String? = null,
     ): String = when (country) {
         Country.NL -> bsn(rng, valid)
         Country.DE -> germanIdCard(rng, valid)
@@ -58,6 +61,7 @@ object NationalIdGenerator {
         Country.SE -> swedishPersonnummer(rng, valid, birth, gender)
         Country.FI -> finnishHetu(rng, valid, birth, gender)
         Country.NO -> norwegianFnr(rng, valid, birth, gender)
+        Country.IT -> italianCodiceFiscale(rng, valid, birth, gender, surname, givenName)
         else -> throw IllegalArgumentException("No national ID scheme for ${country.code} in v1")
     }
 
@@ -75,6 +79,7 @@ object NationalIdGenerator {
         Country.SE -> EuIdChecksums.isValidSwedishPersonnummer(value)
         Country.FI -> EuIdChecksums.isValidFinnishHetu(value)
         Country.NO -> EuIdChecksums.isValidNorwegianFnr(value)
+        Country.IT -> EuIdChecksums.isValidItalianCf(value)
         else -> false
     }
 
@@ -255,6 +260,48 @@ object NationalIdGenerator {
             val wrong = ((checks.toInt() + 1) % 100).toString().padStart(2, '0')
             return first9 + wrong
         }
+    }
+
+    // --- IT Codice Fiscale (6 name letters + DOB/sex + Belfiore place code + control char) ---
+    private const val CF_MONTHS = "ABCDEHLMPRST"
+    // A handful of real Belfiore codes (major cities): Roma, Milano, Napoli, Torino, Firenze, Bologna, Genova, Palermo.
+    private val CF_PLACE_CODES = listOf("H501", "F205", "F839", "L219", "D612", "A944", "D969", "G273")
+
+    private fun italianCodiceFiscale(
+        rng: Rng,
+        valid: Boolean,
+        birth: LocalDate?,
+        gender: Gender?,
+        surname: String?,
+        givenName: String?,
+    ): String {
+        val sex = gender ?: randomGender(rng)
+        val dob = birth ?: randomDob(rng)
+        val sn = cfSurnameCode(surname ?: rng.upperLetters(3))
+        val gn = cfGivenNameCode(givenName ?: rng.upperLetters(3))
+        val yy = (dob.year % 100).toString().padStart(2, '0')
+        val monthChar = CF_MONTHS[dob.monthValue - 1]
+        val day = (dob.dayOfMonth + if (sex == Gender.FEMALE) 40 else 0).toString().padStart(2, '0')
+        val first15 = "$sn$gn$yy$monthChar$day${rng.pick(CF_PLACE_CODES)}"
+        val check = EuIdChecksums.italianCfCheckChar(first15)
+        return if (valid) "$first15$check" else first15 + if (check == 'A') 'B' else 'A'
+    }
+
+    private fun cfConsonants(name: String): String = name.filter { it in "BCDFGHJKLMNPQRSTVWXYZ" }
+    private fun cfVowels(name: String): String = name.filter { it in "AEIOU" }
+
+    /** Surname code: consonants then vowels, first three, padded with X. */
+    private fun cfSurnameCode(name: String): String {
+        val n = name.uppercase().filter { it in 'A'..'Z' }
+        return (cfConsonants(n) + cfVowels(n) + "XXX").substring(0, 3)
+    }
+
+    /** Given-name code: with 4+ consonants take the 1st, 3rd and 4th; otherwise consonants then vowels, padded. */
+    private fun cfGivenNameCode(name: String): String {
+        val n = name.uppercase().filter { it in 'A'..'Z' }
+        val consonants = cfConsonants(n)
+        val picked = if (consonants.length >= 4) "${consonants[0]}${consonants[2]}${consonants[3]}" else consonants
+        return (picked + cfVowels(n) + "XXX").substring(0, 3)
     }
 
     private fun randomGender(rng: Rng): Gender = if (rng.boolean()) Gender.MALE else Gender.FEMALE

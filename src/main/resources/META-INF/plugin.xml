@@ -37,6 +37,10 @@
     ]]></description>
 
     <change-notes><![CDATA[
+    <h3>1.6.0</h3>
+    <ul>
+      <li><b>Italy — Codice Fiscale</b>: full 16-character code with the real mod-26 control character. In a persona it encodes that person's name, date of birth and sex, so the Codice Fiscale is consistent with the rest of the identity.</li>
+    </ul>
     <h3>1.5.0</h3>
     <ul>
       <li>More VAT: <b>France</b> (TVA — 2-digit key over a Luhn-valid SIREN) and <b>Spain</b> (CIF, type A — Sociedad Anónima), each with its real checksum and an invalid variant.</li>

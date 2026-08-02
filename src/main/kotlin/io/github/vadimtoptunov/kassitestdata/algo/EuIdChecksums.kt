@@ -184,6 +184,34 @@ object EuIdChecksums {
         return spanishCifControl(digits) == (value[8] - '0')
     }
 
+    // ---- Italy — Codice Fiscale (control character over 15 chars, mod 26) ----
+    private val CF_ODD = mapOf(
+        '0' to 1, '1' to 0, '2' to 5, '3' to 7, '4' to 9, '5' to 13, '6' to 15, '7' to 17, '8' to 19, '9' to 21,
+        'A' to 1, 'B' to 0, 'C' to 5, 'D' to 7, 'E' to 9, 'F' to 13, 'G' to 15, 'H' to 17, 'I' to 19, 'J' to 21,
+        'K' to 2, 'L' to 4, 'M' to 18, 'N' to 20, 'O' to 11, 'P' to 3, 'Q' to 6, 'R' to 8, 'S' to 12, 'T' to 14,
+        'U' to 16, 'V' to 10, 'W' to 22, 'X' to 25, 'Y' to 24, 'Z' to 23,
+    )
+
+    private fun cfEvenValue(c: Char): Int = if (c in '0'..'9') c - '0' else c - 'A'
+
+    /** Control letter for the 15-char body: odd positions (1-based) use a scrambled table, even positions the plain value. */
+    fun italianCfCheckChar(first15: String): Char {
+        var sum = 0
+        for (i in 0 until 15) {
+            val c = first15[i]
+            sum += if (i % 2 == 0) CF_ODD.getValue(c) else cfEvenValue(c) // i even (0-based) == odd position (1-based)
+        }
+        return 'A' + (sum % 26)
+    }
+
+    private val CF_PATTERN = Regex("^[A-Z]{6}[0-9]{2}[A-Z][0-9]{2}[A-Z][0-9]{3}[A-Z]$")
+
+    fun isValidItalianCf(value: String): Boolean {
+        val s = value.uppercase()
+        if (!CF_PATTERN.matches(s)) return false
+        return italianCfCheckChar(s.substring(0, 15)) == s[15]
+    }
+
     // ---- LEI — Legal Entity Identifier (ISO 17442 / ISO 7064 MOD 97-10) ----
     private fun toNumeric(s: String): String = buildString {
         for (c in s.uppercase()) when {

@@ -7,6 +7,7 @@ import io.github.vadimtoptunov.kassitestdata.core.Rng
 import io.github.vadimtoptunov.kassitestdata.generators.LeiGenerator
 import io.github.vadimtoptunov.kassitestdata.generators.NationalIdGenerator
 import io.github.vadimtoptunov.kassitestdata.generators.TaxIdGenerator
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -110,6 +111,45 @@ class EuIdChecksumsTest {
     fun `Spain CIF type A reference`() {
         assertTrue(EuIdChecksums.isValidSpanishCifTypeA("A58818501"))
         assertFalse(EuIdChecksums.isValidSpanishCifTypeA("A58818502"))
+    }
+
+    @Test
+    fun `Italy Codice Fiscale control character reference`() {
+        assertTrue(EuIdChecksums.isValidItalianCf("RSSMRA85T10A562S")) // Mario Rossi, the classic CF example
+        assertFalse(EuIdChecksums.isValidItalianCf("RSSMRA85T10A562T"))
+    }
+
+    @Test
+    fun `Italy Codice Fiscale encodes name, birth and sex`() {
+        val rng = Rng(1L)
+        val male = io.github.vadimtoptunov.kassitestdata.core.Gender.MALE
+        val female = io.github.vadimtoptunov.kassitestdata.core.Gender.FEMALE
+        val cf = NationalIdGenerator.generate(
+            Country.IT, rng, valid = true,
+            birth = java.time.LocalDate.of(1985, 12, 10), gender = male, surname = "Rossi", givenName = "Mario",
+        )
+        assertTrue(NationalIdGenerator.isValid(Country.IT, cf), cf)
+        assertTrue(cf.startsWith("RSSMRA85T10"), cf) // RSS+MRA, year 85, month T (Dec), day 10
+        val cfFemale = NationalIdGenerator.generate(
+            Country.IT, rng, valid = true,
+            birth = java.time.LocalDate.of(1985, 12, 10), gender = female, surname = "Rossi", givenName = "Maria",
+        )
+        assertTrue(cfFemale.startsWith("RSSMRA85T50"), cfFemale) // female: day 10 + 40 = 50
+    }
+
+    @Test
+    fun `Italian persona Codice Fiscale is coherent with DOB and sex`() {
+        for (seed in 1L..8L) {
+            val p = io.github.vadimtoptunov.kassitestdata.core.PersonaGenerator.generate(Country.IT, seed)
+            val cf = p.nationalId!!
+            assertTrue(NationalIdGenerator.isValid(Country.IT, cf), cf)
+            assertEquals((p.dateOfBirth.year % 100).toString().padStart(2, '0'), cf.substring(6, 8), cf)
+            assertEquals("ABCDEHLMPRST"[p.dateOfBirth.monthValue - 1], cf[8])
+            val day = cf.substring(9, 11).toInt()
+            val expectedDay = p.dateOfBirth.dayOfMonth +
+                if (p.gender == io.github.vadimtoptunov.kassitestdata.core.Gender.FEMALE) 40 else 0
+            assertEquals(expectedDay, day, cf)
+        }
     }
 
     @Test
