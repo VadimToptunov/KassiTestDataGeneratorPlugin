@@ -27,6 +27,9 @@ object NationalIdGenerator {
         Country.ES to Scheme("DNI/NIE", Validation.CHECKSUM),
         Country.PT to Scheme("NIF", Validation.CHECKSUM),
         Country.PL to Scheme("PESEL", Validation.CHECKSUM),
+        Country.FR to Scheme("NIR (INSEE)", Validation.CHECKSUM),
+        Country.BE to Scheme("National No.", Validation.CHECKSUM),
+        Country.SE to Scheme("Personnummer", Validation.CHECKSUM),
     )
 
     /**
@@ -48,6 +51,9 @@ object NationalIdGenerator {
         Country.ES -> spanishDni(rng, valid)
         Country.PT -> portugueseNif(rng, valid)
         Country.PL -> pesel(rng, valid, birth, gender)
+        Country.FR -> frenchNir(rng, valid, birth, gender)
+        Country.BE -> belgianNationalNumber(rng, valid, birth, gender)
+        Country.SE -> swedishPersonnummer(rng, valid, birth, gender)
         else -> throw IllegalArgumentException("No national ID scheme for ${country.code} in v1")
     }
 
@@ -60,6 +66,9 @@ object NationalIdGenerator {
         Country.ES -> EuIdChecksums.isValidSpanishDni(value)
         Country.PT -> EuIdChecksums.isValidPortugueseNif(value)
         Country.PL -> EuIdChecksums.isValidPesel(value)
+        Country.FR -> EuIdChecksums.isValidFrenchNir(value)
+        Country.BE -> EuIdChecksums.isValidBelgianNationalNumber(value)
+        Country.SE -> EuIdChecksums.isValidSwedishPersonnummer(value)
         else -> false
     }
 
@@ -158,8 +167,66 @@ object NationalIdGenerator {
         return if (valid) first10 + check else first10 + ((check + 1) % 10)
     }
 
+    // --- FR NIR / INSEE (13 digits + 2 key; sex + YY + MM + dept + commune + order) ---
+    private fun frenchNir(rng: Rng, valid: Boolean, birth: LocalDate?, gender: Gender?): String {
+        val sex = gender ?: randomGender(rng)
+        val dob = birth ?: randomDob(rng)
+        val sexDigit = if (sex == Gender.MALE) '1' else '2'
+        val yy = (dob.year % 100).toString().padStart(2, '0')
+        val mm = dob.monthValue.toString().padStart(2, '0')
+        val dept = rng.intInRange(1, 95).let { if (it == 20) 19 else it } // mainland only (skip Corsica 2A/2B)
+            .toString().padStart(2, '0')
+        val first13 = "$sexDigit$yy$mm$dept${rng.digits(3)}${rng.digitsNonZeroLead(3)}"
+        val key = EuIdChecksums.frenchNirKey(first13)
+        val keyStr = key.toString().padStart(2, '0')
+        return if (valid) first13 + keyStr else first13 + wrongTwoDigit(key)
+    }
+
+    // --- BE National Register Number (11 digits; YYMMDD + serial + mod-97 check) ---
+    private fun belgianNationalNumber(rng: Rng, valid: Boolean, birth: LocalDate?, gender: Gender?): String {
+        val sex = gender ?: randomGender(rng)
+        val dob = birth ?: randomDob(rng)
+        val yy = (dob.year % 100).toString().padStart(2, '0')
+        val mm = dob.monthValue.toString().padStart(2, '0')
+        val dd = dob.dayOfMonth.toString().padStart(2, '0')
+        // Serial 001..996; parity encodes sex (odd = male, even = female).
+        val base = rng.intInRange(1, 498)
+        val serial = (if (sex == Gender.MALE) 2 * base - 1 else 2 * base).toString().padStart(3, '0')
+        val first9 = "$yy$mm$dd$serial"
+        val check = EuIdChecksums.belgianNationalNumberCheck(first9, bornFrom2000 = dob.year >= 2000)
+        if (valid) return first9 + check.toString().padStart(2, '0')
+        // isValid() accepts either birth era, so the invalid trailing check must match neither.
+        val c0 = EuIdChecksums.belgianNationalNumberCheck(first9, bornFrom2000 = false)
+        val c1 = EuIdChecksums.belgianNationalNumberCheck(first9, bornFrom2000 = true)
+        var wrong = (check % 97) + 1
+        while (wrong == c0 || wrong == c1) wrong = (wrong % 97) + 1
+        return first9 + wrong.toString().padStart(2, '0')
+    }
+
+    // --- SE personnummer (10 digits; YYMMDD + birth number + Luhn) ---
+    private fun swedishPersonnummer(rng: Rng, valid: Boolean, birth: LocalDate?, gender: Gender?): String {
+        val sex = gender ?: randomGender(rng)
+        val dob = birth ?: randomDob(rng)
+        val yy = (dob.year % 100).toString().padStart(2, '0')
+        val mm = dob.monthValue.toString().padStart(2, '0')
+        val dd = dob.dayOfMonth.toString().padStart(2, '0')
+        // 9th digit parity encodes sex (odd = male, even = female).
+        val sexDigit = if (sex == Gender.MALE) 2 * rng.intInRange(0, 4) + 1 else 2 * rng.intInRange(0, 4)
+        val first9 = "$yy$mm$dd${rng.digits(2)}$sexDigit"
+        val check = Checksums.luhnCheckDigit(first9)
+        return if (valid) first9 + check else first9 + ((check + 1) % 10)
+    }
+
+    private fun randomGender(rng: Rng): Gender = if (rng.boolean()) Gender.MALE else Gender.FEMALE
+
+    private fun randomDob(rng: Rng): LocalDate =
+        LocalDate.of(rng.intInRange(1950, 2005), rng.intInRange(1, 12), rng.intInRange(1, 28))
+
     private fun corruptLastDigit(number: String): String {
         val last = number.last() - '0'
         return number.dropLast(1) + ((last + 1) % 10)
     }
+
+    /** A 2-digit string that differs from [check] (used to build an invalid trailing check). */
+    private fun wrongTwoDigit(check: Int): String = ((check % 97) + 1).toString().padStart(2, '0')
 }

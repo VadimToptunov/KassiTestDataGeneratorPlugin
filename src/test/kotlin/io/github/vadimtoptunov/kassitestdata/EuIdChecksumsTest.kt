@@ -97,6 +97,57 @@ class EuIdChecksumsTest {
     }
 
     @Test
+    fun `France NIR reference and generated values pass an independent mod-97`() {
+        val rng = Rng(3L)
+        repeat(50) {
+            val nir = NationalIdGenerator.generate(Country.FR, rng, valid = true)
+            assertTrue(EuIdChecksums.isValidFrenchNir(nir), "valid NIR: $nir")
+            val independentKey = 97 - BigInteger(nir.substring(0, 13)).mod(BigInteger.valueOf(97)).toInt()
+            assertTrue(nir.substring(13).toInt() == independentKey, "independent key mismatch: $nir")
+            assertFalse(EuIdChecksums.isValidFrenchNir(NationalIdGenerator.generate(Country.FR, rng, valid = false)))
+        }
+    }
+
+    @Test
+    fun `Belgium national number mod-97 reference`() {
+        assertTrue(EuIdChecksums.isValidBelgianNationalNumber("93051822361")) // 930518223 % 97 = 36 -> 61
+        assertFalse(EuIdChecksums.isValidBelgianNationalNumber("93051822362"))
+    }
+
+    @Test
+    fun `Sweden personnummer Luhn reference`() {
+        assertTrue(EuIdChecksums.isValidSwedishPersonnummer("8112189876")) // documented valid personnummer
+        assertFalse(EuIdChecksums.isValidSwedishPersonnummer("8112189875"))
+    }
+
+    @Test
+    fun `FR BE SE personas encode the date of birth and sex`() {
+        for ((country, length) in listOf(Country.FR to 15, Country.BE to 11, Country.SE to 10)) {
+            for (seed in 1L..8L) { // a range of seeds to cover both sexes
+                val persona = io.github.vadimtoptunov.kassitestdata.core.PersonaGenerator.generate(country, seed)
+                val id = persona.nationalId!!
+                assertTrue(id.length == length, "$country id length: $id")
+                assertTrue(NationalIdGenerator.isValid(country, id), "$country valid: $id")
+                val yy = (persona.dateOfBirth.year % 100).toString().padStart(2, '0')
+                val mm = persona.dateOfBirth.monthValue.toString().padStart(2, '0')
+                val dd = persona.dateOfBirth.dayOfMonth.toString().padStart(2, '0')
+                val male = persona.gender == io.github.vadimtoptunov.kassitestdata.core.Gender.MALE
+                when (country) {
+                    Country.FR -> {
+                        assertTrue(id[0] == if (male) '1' else '2', "FR sex digit: $id")
+                        assertTrue(id.substring(1, 3) == yy && id.substring(3, 5) == mm, "FR DOB: $id")
+                    }
+                    else -> { // BE and SE are YYMMDD-prefixed
+                        assertTrue(id.startsWith("$yy$mm$dd"), "$country DOB: $id")
+                        val sexDigit = if (country == Country.BE) id.substring(6, 9).toInt() else id[8] - '0'
+                        assertTrue((sexDigit % 2 == 1) == male, "$country sex parity: $id")
+                    }
+                }
+            }
+        }
+    }
+
+    @Test
     fun `PESEL encodes the persona date of birth`() {
         val p = io.github.vadimtoptunov.kassitestdata.core.PersonaGenerator.generate(Country.PL, seed = 123L)
         val pesel = p.nationalId!!

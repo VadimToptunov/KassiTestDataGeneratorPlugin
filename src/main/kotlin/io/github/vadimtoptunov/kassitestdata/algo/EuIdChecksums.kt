@@ -80,6 +80,35 @@ object EuIdChecksums {
         return belgianVatCheck(value.substring(0, 8)) == value.substring(8).toInt()
     }
 
+    // ---- France — NIR / INSEE (national ID, mod 97 key; encodes sex + DOB) ----
+    /** NIR key = 97 − (13-digit body mod 97), always in 1..97. Numeric NIRs only (Corsica 2A/2B unsupported). */
+    fun frenchNirKey(first13: String): Int = 97 - Checksums.mod97(first13)
+
+    fun isValidFrenchNir(value: String): Boolean {
+        if (value.length != 15 || !value.all { it in '0'..'9' }) return false
+        if (value[0] != '1' && value[0] != '2') return false
+        return frenchNirKey(value.substring(0, 13)) == value.substring(13).toInt()
+    }
+
+    // ---- Belgium — National Register Number (mod 97; +2000000000 for births from 2000; encodes DOB + sex) ----
+    fun belgianNationalNumberCheck(first9: String, bornFrom2000: Boolean): Int {
+        val base = (if (bornFrom2000) "2$first9" else first9).toLong()
+        return 97 - (base % 97).toInt()
+    }
+
+    fun isValidBelgianNationalNumber(value: String): Boolean {
+        if (value.length != 11 || !value.all { it in '0'..'9' }) return false
+        val first9 = value.substring(0, 9)
+        val provided = value.substring(9).toInt()
+        // The number itself doesn't say whether the person was born before or from 2000, so accept either.
+        return belgianNationalNumberCheck(first9, false) == provided ||
+            belgianNationalNumberCheck(first9, true) == provided
+    }
+
+    // ---- Sweden — personnummer (10 digits, Luhn over the first 9; encodes DOB + sex) ----
+    fun isValidSwedishPersonnummer(value: String): Boolean =
+        value.length == 10 && value.all { it in '0'..'9' } && Checksums.isLuhnValid(value)
+
     // ---- LEI — Legal Entity Identifier (ISO 17442 / ISO 7064 MOD 97-10) ----
     private fun toNumeric(s: String): String = buildString {
         for (c in s.uppercase()) when {
