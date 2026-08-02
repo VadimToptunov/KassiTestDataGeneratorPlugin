@@ -77,6 +77,16 @@ object TestDataCatalog {
             LeiGenerator.generate(Rng(seed), valid = true)
         }
 
+        // 5c. Passport MRZ — ICAO 9303 TD3, every country, valid + invalid.
+        for (country in Country.entries.sortedBy { it.displayName }) {
+            items += CatalogItem("Passport", "Passport MRZ (${country.code}) · valid · ${country.displayName}") { seed ->
+                MrzGenerator.td3(country, Rng(seed), valid = true)
+            }
+            items += CatalogItem("Passport", "Passport MRZ (${country.code}) · invalid · ${country.displayName}") { seed ->
+                MrzGenerator.td3(country, Rng(seed), valid = false)
+            }
+        }
+
         // 6. Persona — coherent bundle, every country.
         for (country in Country.entries.sortedBy { it.displayName }) {
             items += CatalogItem("Persona", "Persona (${country.code}) · ${country.displayName}") { seed ->

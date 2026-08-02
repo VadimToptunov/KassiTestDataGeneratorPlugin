@@ -4,6 +4,7 @@ import io.github.vadimtoptunov.kassitestdata.data.IbanRegistry
 import io.github.vadimtoptunov.kassitestdata.data.Names
 import io.github.vadimtoptunov.kassitestdata.generators.BankAccountGenerator
 import io.github.vadimtoptunov.kassitestdata.generators.BicGenerator
+import io.github.vadimtoptunov.kassitestdata.generators.MrzGenerator
 import io.github.vadimtoptunov.kassitestdata.generators.NationalIdGenerator
 import io.github.vadimtoptunov.kassitestdata.generators.TaxIdGenerator
 import java.time.LocalDate
@@ -28,6 +29,7 @@ data class Persona(
     val nationalId: String?,
     val taxLabel: String?,
     val taxId: String?,
+    val passportMrz: String,
     val seed: Long?,
 ) {
     fun formatted(): String = buildString {
@@ -40,6 +42,8 @@ data class Persona(
         appendLine("BIC:           $bic")
         if (nationalId != null) appendLine("$nationalIdLabel${padTo(nationalIdLabel!!)}$nationalId")
         if (taxId != null) appendLine("$taxLabel${padTo(taxLabel!!)}$taxId")
+        appendLine("Passport MRZ:")
+        appendLine(passportMrz)
         if (seed != null) append("Seed:          $seed")
     }
 
@@ -98,6 +102,11 @@ object PersonaGenerator {
         val taxId = taxScheme?.let { TaxIdGenerator.generate(country, rng, valid = true) }
         val taxLabel = taxScheme?.let { "${it.label}:" }
 
+        // Passport MRZ (ICAO TD3), coherent with the persona's name, nationality, DOB and sex.
+        val passportMrz = MrzGenerator.td3(
+            country, rng, valid = true, birth = dob, gender = gender, surname = last, givenNames = first,
+        )
+
         return Persona(
             country = country,
             gender = gender,
@@ -111,6 +120,7 @@ object PersonaGenerator {
             nationalId = nationalId,
             taxLabel = taxLabel,
             taxId = taxId,
+            passportMrz = passportMrz,
             seed = seed,
         )
     }
