@@ -93,7 +93,23 @@ class EuIdChecksumsTest {
             assertFalse(EuIdChecksums.isValidBelgianVat(TaxIdGenerator.belgianVat(rng, valid = false)))
             assertTrue(EuIdChecksums.isValidPortugueseNif(TaxIdGenerator.portugueseVat(rng, valid = true)))
             assertFalse(EuIdChecksums.isValidPortugueseNif(TaxIdGenerator.portugueseVat(rng, valid = false)))
+            assertTrue(EuIdChecksums.isValidFrenchVat(TaxIdGenerator.frenchVat(rng, valid = true)))
+            assertFalse(EuIdChecksums.isValidFrenchVat(TaxIdGenerator.frenchVat(rng, valid = false)))
+            assertTrue(EuIdChecksums.isValidSpanishCifTypeA(TaxIdGenerator.spanishCif(rng, valid = true)))
+            assertFalse(EuIdChecksums.isValidSpanishCifTypeA(TaxIdGenerator.spanishCif(rng, valid = false)))
         }
+    }
+
+    @Test
+    fun `France VAT key reference`() {
+        assertTrue(EuIdChecksums.isValidFrenchVat("83404833048")) // key 83 over the Luhn-valid SIREN 404833048
+        assertFalse(EuIdChecksums.isValidFrenchVat("84404833048"))
+    }
+
+    @Test
+    fun `Spain CIF type A reference`() {
+        assertTrue(EuIdChecksums.isValidSpanishCifTypeA("A58818501"))
+        assertFalse(EuIdChecksums.isValidSpanishCifTypeA("A58818502"))
     }
 
     @Test

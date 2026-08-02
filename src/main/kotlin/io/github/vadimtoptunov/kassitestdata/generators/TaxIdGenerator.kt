@@ -24,6 +24,8 @@ object TaxIdGenerator {
         Country.IT to Scheme("VAT (P.IVA)"),
         Country.BE to Scheme("VAT (BTW/TVA)"),
         Country.PT to Scheme("VAT (NIF)"),
+        Country.FR to Scheme("VAT (TVA)"),
+        Country.ES to Scheme("VAT (CIF)"),
     )
 
     /** Full identifier as presented (with country prefix for VAT). */
@@ -37,6 +39,8 @@ object TaxIdGenerator {
         Country.IT -> "IT" + italianVat(rng, valid)
         Country.BE -> "BE" + belgianVat(rng, valid)
         Country.PT -> "PT" + portugueseVat(rng, valid)
+        Country.FR -> "FR" + frenchVat(rng, valid)
+        Country.ES -> "ES" + spanishCif(rng, valid)
         else -> throw IllegalArgumentException("No tax scheme for ${country.code} in v1")
     }
 
@@ -78,6 +82,24 @@ object TaxIdGenerator {
         val first8 = rng.digitsNonZeroLead(8)
         val check = EuIdChecksums.portugueseNifCheckDigit(first8)
         return if (valid) first8 + check else first8 + ((check + 1) % 10)
+    }
+
+    // --- FR TVA: 2-digit key + 9-digit Luhn-valid SIREN ---
+    fun frenchVat(rng: Rng, valid: Boolean): String {
+        val siren8 = rng.digitsNonZeroLead(8)
+        val siren = siren8 + Checksums.luhnCheckDigit(siren8)
+        val key = EuIdChecksums.frenchVatKey(siren)
+        if (valid) return key.toString().padStart(2, '0') + siren
+        // Corrupt the key so it no longer matches the SIREN (the SIREN stays Luhn-valid).
+        val wrongKey = (key + 1) % 97
+        return wrongKey.toString().padStart(2, '0') + siren
+    }
+
+    // --- ES CIF (type A, Sociedad Anónima): 'A' + 7 digits + digit control ---
+    fun spanishCif(rng: Rng, valid: Boolean): String {
+        val digits = rng.digits(7)
+        val control = EuIdChecksums.spanishCifControl(digits)
+        return if (valid) "A$digits$control" else "A$digits${(control + 1) % 10}"
     }
 
     // --- CY VAT: 8 digits + check letter ---

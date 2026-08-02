@@ -149,6 +149,41 @@ object EuIdChecksums {
         return norwegianCheckDigits(value.substring(0, 9)) == value.substring(9)
     }
 
+    // ---- France — VAT / TVA (2-digit key over a Luhn-valid SIREN, mod 97) ----
+    fun frenchVatKey(siren: String): Int = (12 + 3 * (siren.toLong() % 97)).toInt() % 97
+
+    fun isValidFrenchVat(value: String): Boolean {
+        // key (2) + SIREN (9, Luhn-valid)
+        if (value.length != 11 || !value.all { it in '0'..'9' }) return false
+        val siren = value.substring(2)
+        if (!Checksums.isLuhnValid(siren)) return false
+        return frenchVatKey(siren) == value.substring(0, 2).toInt()
+    }
+
+    // ---- Spain — CIF (company tax ID); control per the standard, a digit for type A ----
+    /** Control value 0..9 for the 7-digit body: even positions summed, odd positions doubled + cross-summed. */
+    fun spanishCifControl(sevenDigits: String): Int {
+        var sum = 0
+        for (i in 0..6) {
+            val d = sevenDigits[i] - '0'
+            if (i % 2 == 0) { // 1st, 3rd, 5th, 7th digit — double and cross-sum
+                val doubled = d * 2
+                sum += doubled / 10 + doubled % 10
+            } else {
+                sum += d
+            }
+        }
+        return (10 - sum % 10) % 10
+    }
+
+    /** Type-A CIF (Sociedad Anónima): letter A + 7 digits + a digit control. */
+    fun isValidSpanishCifTypeA(value: String): Boolean {
+        if (value.length != 9 || value[0] != 'A') return false
+        val digits = value.substring(1, 8)
+        if (!digits.all { it in '0'..'9' } || value[8] !in '0'..'9') return false
+        return spanishCifControl(digits) == (value[8] - '0')
+    }
+
     // ---- LEI — Legal Entity Identifier (ISO 17442 / ISO 7064 MOD 97-10) ----
     private fun toNumeric(s: String): String = buildString {
         for (c in s.uppercase()) when {

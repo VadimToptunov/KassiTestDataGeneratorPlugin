@@ -1,6 +1,7 @@
 package io.github.vadimtoptunov.kassitestdata
 
 import io.github.vadimtoptunov.kassitestdata.algo.Checksums
+import io.github.vadimtoptunov.kassitestdata.algo.EuIdChecksums
 import io.github.vadimtoptunov.kassitestdata.core.Rng
 import io.github.vadimtoptunov.kassitestdata.generators.TaxIdGenerator
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -55,5 +56,23 @@ class TaxIdGeneratorTest {
     fun `presented VAT identifiers carry the country prefix`() {
         assertTrue(TaxIdGenerator.generate(io.github.vadimtoptunov.kassitestdata.core.Country.DE, rng).startsWith("DE"))
         assertTrue(TaxIdGenerator.generate(io.github.vadimtoptunov.kassitestdata.core.Country.CY, rng).startsWith("CY"))
+    }
+
+    @Test
+    fun `France and Spain VAT valid passes and invalid fails`() {
+        repeat(50) {
+            assertTrue(EuIdChecksums.isValidFrenchVat(TaxIdGenerator.frenchVat(rng, valid = true)))
+            assertFalse(EuIdChecksums.isValidFrenchVat(TaxIdGenerator.frenchVat(rng, valid = false)))
+            assertTrue(EuIdChecksums.isValidSpanishCifTypeA(TaxIdGenerator.spanishCif(rng, valid = true)))
+            assertFalse(EuIdChecksums.isValidSpanishCifTypeA(TaxIdGenerator.spanishCif(rng, valid = false)))
+        }
+    }
+
+    @Test
+    fun `presented FR and ES VAT carry the prefix and a valid body`() {
+        val fr = TaxIdGenerator.generate(io.github.vadimtoptunov.kassitestdata.core.Country.FR, rng)
+        assertTrue(fr.startsWith("FR") && EuIdChecksums.isValidFrenchVat(fr.substring(2)), fr)
+        val es = TaxIdGenerator.generate(io.github.vadimtoptunov.kassitestdata.core.Country.ES, rng)
+        assertTrue(es.startsWith("ES") && EuIdChecksums.isValidSpanishCifTypeA(es.substring(2)), es)
     }
 }
