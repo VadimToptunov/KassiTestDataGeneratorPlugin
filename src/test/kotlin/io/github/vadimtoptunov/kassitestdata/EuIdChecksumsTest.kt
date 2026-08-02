@@ -148,6 +148,37 @@ class EuIdChecksumsTest {
     }
 
     @Test
+    fun `Finland HETU mod-31 reference`() {
+        assertTrue(EuIdChecksums.isValidFinnishHetu("131052-308T")) // classic reference HETU
+        assertFalse(EuIdChecksums.isValidFinnishHetu("131052-308U"))
+    }
+
+    @Test
+    fun `Norway fodselsnummer mod-11 reference`() {
+        assertTrue(EuIdChecksums.isValidNorwegianFnr("11111110060")) // k1=6, k2=0
+        assertFalse(EuIdChecksums.isValidNorwegianFnr("11111110061"))
+    }
+
+    @Test
+    fun `FI NO personas encode the date of birth and sex`() {
+        for (country in listOf(Country.FI, Country.NO)) {
+            for (seed in 1L..8L) {
+                val persona = io.github.vadimtoptunov.kassitestdata.core.PersonaGenerator.generate(country, seed)
+                val id = persona.nationalId!!
+                assertTrue(NationalIdGenerator.isValid(country, id), "$country valid: $id")
+                val dd = persona.dateOfBirth.dayOfMonth.toString().padStart(2, '0')
+                val mm = persona.dateOfBirth.monthValue.toString().padStart(2, '0')
+                val yy = (persona.dateOfBirth.year % 100).toString().padStart(2, '0')
+                assertTrue(id.startsWith("$dd$mm$yy"), "$country DDMMYY: $id") // both are day-first
+                val male = persona.gender == io.github.vadimtoptunov.kassitestdata.core.Gender.MALE
+                // FI: individual number is chars 7..9; NO: the 9th digit (index 8).
+                val sexDigit = if (country == Country.FI) id.substring(7, 10).toInt() else id[8] - '0'
+                assertTrue((sexDigit % 2 == 1) == male, "$country sex parity: $id")
+            }
+        }
+    }
+
+    @Test
     fun `PESEL encodes the persona date of birth`() {
         val p = io.github.vadimtoptunov.kassitestdata.core.PersonaGenerator.generate(Country.PL, seed = 123L)
         val pesel = p.nationalId!!

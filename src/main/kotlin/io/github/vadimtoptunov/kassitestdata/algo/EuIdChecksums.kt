@@ -109,6 +109,46 @@ object EuIdChecksums {
     fun isValidSwedishPersonnummer(value: String): Boolean =
         value.length == 10 && value.all { it in '0'..'9' } && Checksums.isLuhnValid(value)
 
+    // ---- Finland — HETU (personal identity code, mod 31 check char; encodes DOB + sex) ----
+    private const val HETU_CHECK = "0123456789ABCDEFHJKLMNPRSTUVWXY" // 31 symbols
+    private const val HETU_SIGNS = "+-ABCDEFYXWVU" // century markers (1800s / 2000s / 1900s)
+
+    /** Check char for the 9-digit `DDMMYY` + individual number string. */
+    fun finnishHetuCheckChar(dateAndIndividual: String): Char = HETU_CHECK[(dateAndIndividual.toLong() % 31).toInt()]
+
+    fun isValidFinnishHetu(value: String): Boolean {
+        // DDMMYY (6) + century sign (1) + individual (3) + check (1)
+        if (value.length != 11) return false
+        val date = value.substring(0, 6)
+        val individual = value.substring(7, 10)
+        if (!date.all { it in '0'..'9' } || !individual.all { it in '0'..'9' }) return false
+        if (value[6] !in HETU_SIGNS) return false
+        return finnishHetuCheckChar(date + individual) == value[10]
+    }
+
+    // ---- Norway — fødselsnummer (11 digits, two mod-11 check digits; encodes DOB + sex) ----
+    private val NO_WEIGHTS_1 = intArrayOf(3, 7, 6, 1, 8, 9, 4, 5, 2)
+    private val NO_WEIGHTS_2 = intArrayOf(5, 4, 3, 2, 7, 6, 5, 4, 3, 2)
+
+    /** The two check digits for a 9-digit `DDMMYY` + individual body, or null if either would be 10 (never issued). */
+    fun norwegianCheckDigits(first9: String): String? {
+        var s1 = 0
+        for (i in 0..8) s1 += (first9[i] - '0') * NO_WEIGHTS_1[i]
+        val k1 = (11 - (s1 % 11)) % 11
+        if (k1 == 10) return null
+        val first10 = first9 + k1
+        var s2 = 0
+        for (i in 0..9) s2 += (first10[i] - '0') * NO_WEIGHTS_2[i]
+        val k2 = (11 - (s2 % 11)) % 11
+        if (k2 == 10) return null
+        return "$k1$k2"
+    }
+
+    fun isValidNorwegianFnr(value: String): Boolean {
+        if (value.length != 11 || !value.all { it in '0'..'9' }) return false
+        return norwegianCheckDigits(value.substring(0, 9)) == value.substring(9)
+    }
+
     // ---- LEI — Legal Entity Identifier (ISO 17442 / ISO 7064 MOD 97-10) ----
     private fun toNumeric(s: String): String = buildString {
         for (c in s.uppercase()) when {

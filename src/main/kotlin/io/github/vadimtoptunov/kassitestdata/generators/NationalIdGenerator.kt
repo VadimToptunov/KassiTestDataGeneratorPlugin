@@ -30,6 +30,8 @@ object NationalIdGenerator {
         Country.FR to Scheme("NIR (INSEE)", Validation.CHECKSUM),
         Country.BE to Scheme("National No.", Validation.CHECKSUM),
         Country.SE to Scheme("Personnummer", Validation.CHECKSUM),
+        Country.FI to Scheme("HETU", Validation.CHECKSUM),
+        Country.NO to Scheme("Fødselsnummer", Validation.CHECKSUM),
     )
 
     /**
@@ -54,6 +56,8 @@ object NationalIdGenerator {
         Country.FR -> frenchNir(rng, valid, birth, gender)
         Country.BE -> belgianNationalNumber(rng, valid, birth, gender)
         Country.SE -> swedishPersonnummer(rng, valid, birth, gender)
+        Country.FI -> finnishHetu(rng, valid, birth, gender)
+        Country.NO -> norwegianFnr(rng, valid, birth, gender)
         else -> throw IllegalArgumentException("No national ID scheme for ${country.code} in v1")
     }
 
@@ -69,6 +73,8 @@ object NationalIdGenerator {
         Country.FR -> EuIdChecksums.isValidFrenchNir(value)
         Country.BE -> EuIdChecksums.isValidBelgianNationalNumber(value)
         Country.SE -> EuIdChecksums.isValidSwedishPersonnummer(value)
+        Country.FI -> EuIdChecksums.isValidFinnishHetu(value)
+        Country.NO -> EuIdChecksums.isValidNorwegianFnr(value)
         else -> false
     }
 
@@ -215,6 +221,40 @@ object NationalIdGenerator {
         val first9 = "$yy$mm$dd${rng.digits(2)}$sexDigit"
         val check = Checksums.luhnCheckDigit(first9)
         return if (valid) first9 + check else first9 + ((check + 1) % 10)
+    }
+
+    // --- FI HETU (DDMMYY + century sign + individual + mod-31 check char) ---
+    private fun finnishHetu(rng: Rng, valid: Boolean, birth: LocalDate?, gender: Gender?): String {
+        val sex = gender ?: randomGender(rng)
+        val dob = birth ?: randomDob(rng)
+        val dd = dob.dayOfMonth.toString().padStart(2, '0')
+        val mm = dob.monthValue.toString().padStart(2, '0')
+        val yy = (dob.year % 100).toString().padStart(2, '0')
+        val sign = when (dob.year / 100) { 18 -> '+'; 20 -> 'A'; else -> '-' }
+        // Individual number 002..899; parity encodes sex (odd = male, even = female).
+        val base = rng.intInRange(1, 449)
+        val individual = (if (sex == Gender.MALE) 2 * base + 1 else 2 * base).toString().padStart(3, '0')
+        val check = EuIdChecksums.finnishHetuCheckChar(dd + mm + yy + individual)
+        val body = "$dd$mm$yy$sign$individual"
+        return if (valid) "$body$check" else body + if (check == '0') '1' else '0'
+    }
+
+    // --- NO fødselsnummer (DDMMYY + individual + two mod-11 check digits) ---
+    private fun norwegianFnr(rng: Rng, valid: Boolean, birth: LocalDate?, gender: Gender?): String {
+        val sex = gender ?: randomGender(rng)
+        val dob = birth ?: randomDob(rng)
+        val dd = dob.dayOfMonth.toString().padStart(2, '0')
+        val mm = dob.monthValue.toString().padStart(2, '0')
+        val yy = (dob.year % 100).toString().padStart(2, '0')
+        while (true) {
+            // 9th digit parity encodes sex (odd = male, even = female).
+            val parity = if (sex == Gender.MALE) 2 * rng.intInRange(0, 4) + 1 else 2 * rng.intInRange(0, 4)
+            val first9 = "$dd$mm$yy${rng.digits(2)}$parity"
+            val checks = EuIdChecksums.norwegianCheckDigits(first9) ?: continue // a check digit hit 10 — retry
+            if (valid) return first9 + checks
+            val wrong = ((checks.toInt() + 1) % 100).toString().padStart(2, '0')
+            return first9 + wrong
+        }
     }
 
     private fun randomGender(rng: Rng): Gender = if (rng.boolean()) Gender.MALE else Gender.FEMALE
