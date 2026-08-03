@@ -38,6 +38,10 @@
     ]]></description>
 
     <change-notes><![CDATA[
+    <h3>1.10.0</h3>
+    <ul>
+      <li>More national IDs: <b>Bulgaria</b> (EGN — weighted mod-11, encodes date of birth &amp; sex) and <b>Croatia</b> (OIB — ISO 7064 MOD 11,10). Each with its real checksum; EGN stays consistent with the persona.</li>
+    </ul>
     <h3>1.9.0</h3>
     <ul>
       <li>More national IDs: <b>Estonia</b> and <b>Lithuania</b> (isikukood / asmens kodas, two-round mod-11) and <b>Czechia</b> and <b>Slovakia</b> (rodné číslo, divisible by 11) — each with its real checksum and encoding date of birth &amp; sex, kept consistent with the persona.</li>

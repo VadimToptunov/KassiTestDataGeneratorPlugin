@@ -269,6 +269,30 @@ class EuIdChecksumsTest {
     }
 
     @Test
+    fun `Bulgaria EGN weighted mod-11 reference`() {
+        assertTrue(EuIdChecksums.isValidBulgarianEgn("7523169263")) // Wikipedia EGN example
+        assertFalse(EuIdChecksums.isValidBulgarianEgn("7523169264"))
+    }
+
+    @Test
+    fun `Croatia OIB MOD 11,10 reference`() {
+        assertTrue(EuIdChecksums.isValidCroatianOib("12345678903")) // canonical test OIB
+        assertFalse(EuIdChecksums.isValidCroatianOib("12345678904"))
+    }
+
+    @Test
+    fun `Bulgarian persona EGN encodes DOB and sex`() {
+        for (seed in 1L..8L) {
+            val p = io.github.vadimtoptunov.kassitestdata.core.PersonaGenerator.generate(Country.BG, seed)
+            val egn = p.nationalId!!
+            assertTrue(NationalIdGenerator.isValid(Country.BG, egn), egn)
+            assertEquals((p.dateOfBirth.year % 100).toString().padStart(2, '0'), egn.substring(0, 2), egn)
+            val male = p.gender == io.github.vadimtoptunov.kassitestdata.core.Gender.MALE
+            assertEquals(male, (egn[8] - '0') % 2 == 0, egn) // 9th digit even = male
+        }
+    }
+
+    @Test
     fun `PESEL encodes the persona date of birth`() {
         val p = io.github.vadimtoptunov.kassitestdata.core.PersonaGenerator.generate(Country.PL, seed = 123L)
         val pesel = p.nationalId!!

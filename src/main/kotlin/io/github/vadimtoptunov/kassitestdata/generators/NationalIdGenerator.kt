@@ -37,6 +37,8 @@ object NationalIdGenerator {
         Country.LT to Scheme("Asmens kodas", Validation.CHECKSUM),
         Country.CZ to Scheme("Rodné číslo", Validation.CHECKSUM),
         Country.SK to Scheme("Rodné číslo", Validation.CHECKSUM),
+        Country.BG to Scheme("EGN", Validation.CHECKSUM),
+        Country.HR to Scheme("OIB", Validation.CHECKSUM),
     )
 
     /**
@@ -68,6 +70,8 @@ object NationalIdGenerator {
         Country.IT -> italianCodiceFiscale(rng, valid, birth, gender, surname, givenName)
         Country.EE, Country.LT -> estonianLithuanianCode(rng, valid, birth, gender)
         Country.CZ, Country.SK -> czechSlovakBirthNumber(rng, valid, birth, gender)
+        Country.BG -> bulgarianEgn(rng, valid, birth, gender)
+        Country.HR -> croatianOib(rng, valid)
         else -> throw IllegalArgumentException("No national ID scheme for ${country.code} in v1")
     }
 
@@ -88,6 +92,8 @@ object NationalIdGenerator {
         Country.IT -> EuIdChecksums.isValidItalianCf(value)
         Country.EE, Country.LT -> EuIdChecksums.isValidEstonianLithuanian(value)
         Country.CZ, Country.SK -> EuIdChecksums.isValidCzechSlovakBirthNumber(value)
+        Country.BG -> EuIdChecksums.isValidBulgarianEgn(value)
+        Country.HR -> EuIdChecksums.isValidCroatianOib(value)
         else -> false
     }
 
@@ -348,6 +354,32 @@ object NationalIdGenerator {
             if (check == 10) continue
             return if (valid) "$first9$check" else first9 + ((check + 1) % 10)
         }
+    }
+
+    // --- BG EGN (YY MM(+offset) DD NNN C, weighted mod-11; month offset encodes century, 9th digit sex) ---
+    private fun bulgarianEgn(rng: Rng, valid: Boolean, birth: LocalDate?, gender: Gender?): String {
+        val sex = gender ?: randomGender(rng)
+        val dob = birth ?: randomDob(rng)
+        val monthOffset = when {
+            dob.year < 1900 -> 20
+            dob.year >= 2000 -> 40
+            else -> 0
+        }
+        val yy = (dob.year % 100).toString().padStart(2, '0')
+        val mm = (dob.monthValue + monthOffset).toString().padStart(2, '0')
+        val dd = dob.dayOfMonth.toString().padStart(2, '0')
+        // 9th digit parity encodes sex (even = male, odd = female).
+        val sexDigit = if (sex == Gender.MALE) 2 * rng.intInRange(0, 4) else 2 * rng.intInRange(0, 4) + 1
+        val first9 = "$yy$mm$dd${rng.digits(2)}$sexDigit"
+        val check = EuIdChecksums.bulgarianEgnCheck(first9)
+        return if (valid) "$first9$check" else first9 + ((check + 1) % 10)
+    }
+
+    // --- HR OIB (11 digits, ISO 7064 MOD 11,10; no encoded DOB) ---
+    private fun croatianOib(rng: Rng, valid: Boolean): String {
+        val first10 = rng.digits(10)
+        val check = Checksums.mod1110CheckDigit(first10)
+        return if (valid) "$first10$check" else first10 + ((check + 1) % 10)
     }
 
     private fun randomGender(rng: Rng): Gender = if (rng.boolean()) Gender.MALE else Gender.FEMALE

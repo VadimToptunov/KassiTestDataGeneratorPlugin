@@ -218,6 +218,27 @@ object EuIdChecksums {
         return month in 1..12
     }
 
+    // ---- Bulgaria — EGN (10 digits, weighted mod 11; encodes DOB + sex) ----
+    private val BG_EGN_WEIGHTS = intArrayOf(2, 4, 8, 5, 10, 9, 7, 3, 6)
+
+    fun bulgarianEgnCheck(first9: String): Int {
+        var sum = 0
+        for (i in 0..8) sum += (first9[i] - '0') * BG_EGN_WEIGHTS[i]
+        val r = sum % 11
+        return if (r == 10) 0 else r
+    }
+
+    fun isValidBulgarianEgn(value: String): Boolean {
+        if (value.length != 10 || !value.all { it in '0'..'9' }) return false
+        return bulgarianEgnCheck(value.substring(0, 9)) == (value[9] - '0')
+    }
+
+    // ---- Croatia — OIB (11 digits, ISO 7064 MOD 11,10) ----
+    fun isValidCroatianOib(value: String): Boolean {
+        if (value.length != 11 || !value.all { it in '0'..'9' }) return false
+        return Checksums.mod1110CheckDigit(value.substring(0, 10)) == (value[10] - '0')
+    }
+
     // ---- Italy — Codice Fiscale (control character over 15 chars, mod 26) ----
     private val CF_ODD = mapOf(
         '0' to 1, '1' to 0, '2' to 5, '3' to 7, '4' to 9, '5' to 13, '6' to 15, '7' to 17, '8' to 19, '9' to 21,
