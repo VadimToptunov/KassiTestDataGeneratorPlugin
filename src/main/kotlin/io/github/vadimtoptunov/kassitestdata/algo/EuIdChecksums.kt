@@ -218,6 +218,36 @@ object EuIdChecksums {
         return month in 1..12
     }
 
+    // ---- Iceland — kennitala (10 digits, weighted mod 11; encodes DOB) ----
+    private val IS_WEIGHTS = intArrayOf(3, 2, 7, 6, 5, 4, 3, 2)
+
+    /** kennitala check digit for the first 8 (DDMMYY + serial); returns 10 to mean "never issued". */
+    fun icelandicKennitalaCheck(first8: String): Int {
+        var sum = 0
+        for (i in 0..7) sum += (first8[i] - '0') * IS_WEIGHTS[i]
+        val r = 11 - (sum % 11)
+        return if (r == 11) 0 else r // r == 10 stays 10 → invalid
+    }
+
+    fun isValidIcelandicKennitala(value: String): Boolean {
+        if (value.length != 10 || !value.all { it in '0'..'9' }) return false
+        val check = icelandicKennitalaCheck(value.substring(0, 8))
+        return check != 10 && check == (value[8] - '0')
+    }
+
+    // ---- EAN-13 check digit (used by the Swiss AHV number) ----
+    fun ean13Check(first12: String): Int {
+        var sum = 0
+        for (i in 0..11) sum += (first12[i] - '0') * if (i % 2 == 0) 1 else 3
+        return (10 - sum % 10) % 10
+    }
+
+    // ---- Switzerland — AHV / AVS (13 digits, starts 756, EAN-13 check) ----
+    fun isValidSwissAhv(value: String): Boolean {
+        if (value.length != 13 || !value.all { it in '0'..'9' } || !value.startsWith("756")) return false
+        return ean13Check(value.substring(0, 12)) == (value[12] - '0')
+    }
+
     // ---- Romania — CNP (13 digits, weighted mod 11 with the published 279146358279 key; DOB + sex) ----
     private val RO_CNP_WEIGHTS = intArrayOf(2, 7, 9, 1, 4, 6, 3, 5, 8, 2, 7, 9)
 

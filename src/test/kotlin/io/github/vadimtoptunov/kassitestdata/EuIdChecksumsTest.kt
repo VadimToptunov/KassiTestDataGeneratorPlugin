@@ -269,6 +269,31 @@ class EuIdChecksumsTest {
     }
 
     @Test
+    fun `Iceland kennitala weighted mod-11 reference`() {
+        assertTrue(EuIdChecksums.isValidIcelandicKennitala("1201743399")) // 12 Jan 1974, check 9, century 9
+        assertFalse(EuIdChecksums.isValidIcelandicKennitala("1201743299"))
+    }
+
+    @Test
+    fun `Switzerland AHV EAN-13 reference`() {
+        assertTrue(EuIdChecksums.isValidSwissAhv("7561234567897")) // EAN-13 over 756123456789 -> 7
+        assertFalse(EuIdChecksums.isValidSwissAhv("7561234567890"))
+    }
+
+    @Test
+    fun `Icelandic persona kennitala encodes the date of birth`() {
+        for (seed in 1L..8L) {
+            val p = io.github.vadimtoptunov.kassitestdata.core.PersonaGenerator.generate(Country.IS, seed)
+            val kt = p.nationalId!!
+            assertTrue(NationalIdGenerator.isValid(Country.IS, kt), kt)
+            val ddmmyy = p.dateOfBirth.dayOfMonth.toString().padStart(2, '0') +
+                p.dateOfBirth.monthValue.toString().padStart(2, '0') +
+                (p.dateOfBirth.year % 100).toString().padStart(2, '0')
+            assertEquals(ddmmyy, kt.substring(0, 6), kt)
+        }
+    }
+
+    @Test
     fun `Romania CNP weighted mod-11 reference`() {
         // Built per the published 279146358279 key: 1|80|05|15|10|001 -> weighted sum 113, 113 % 11 = 3.
         assertTrue(EuIdChecksums.isValidRomanianCnp("1800515100013"))

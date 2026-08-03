@@ -41,6 +41,8 @@ object NationalIdGenerator {
         Country.HR to Scheme("OIB", Validation.CHECKSUM),
         Country.RO to Scheme("CNP", Validation.CHECKSUM),
         Country.GR to Scheme("AMKA", Validation.CHECKSUM),
+        Country.IS to Scheme("Kennitala", Validation.CHECKSUM),
+        Country.CH to Scheme("AHV / AVS", Validation.CHECKSUM),
     )
 
     /**
@@ -76,6 +78,8 @@ object NationalIdGenerator {
         Country.HR -> croatianOib(rng, valid)
         Country.RO -> romanianCnp(rng, valid, birth, gender)
         Country.GR -> greekAmka(rng, valid, birth)
+        Country.IS -> icelandicKennitala(rng, valid, birth)
+        Country.CH -> swissAhv(rng, valid)
         else -> throw IllegalArgumentException("No national ID scheme for ${country.code} in v1")
     }
 
@@ -100,6 +104,8 @@ object NationalIdGenerator {
         Country.HR -> EuIdChecksums.isValidCroatianOib(value)
         Country.RO -> EuIdChecksums.isValidRomanianCnp(value)
         Country.GR -> EuIdChecksums.isValidGreekAmka(value)
+        Country.IS -> EuIdChecksums.isValidIcelandicKennitala(value)
+        Country.CH -> EuIdChecksums.isValidSwissAhv(value)
         else -> false
     }
 
@@ -410,6 +416,28 @@ object NationalIdGenerator {
         val first10 = "$dd$mm$yy${rng.digits(4)}"
         val check = Checksums.luhnCheckDigit(first10)
         return if (valid) "$first10$check" else first10 + ((check + 1) % 10)
+    }
+
+    // --- IS kennitala (DDMMYY + serial + check + century; weighted mod-11) ---
+    private fun icelandicKennitala(rng: Rng, valid: Boolean, birth: LocalDate?): String {
+        val dob = birth ?: randomDob(rng)
+        val dd = dob.dayOfMonth.toString().padStart(2, '0')
+        val mm = dob.monthValue.toString().padStart(2, '0')
+        val yy = (dob.year % 100).toString().padStart(2, '0')
+        val century = when (dob.year / 100) { 20 -> 0; 18 -> 8; else -> 9 } // 2000s / 1800s / 1900s
+        while (true) {
+            val first8 = "$dd$mm$yy${rng.digits(2)}"
+            val check = EuIdChecksums.icelandicKennitalaCheck(first8)
+            if (check == 10) continue // never issued — retry
+            return if (valid) "$first8$check$century" else "$first8${(check + 1) % 10}$century"
+        }
+    }
+
+    // --- CH AHV / AVS (13 digits, 756 prefix + EAN-13 check; no encoded DOB) ---
+    private fun swissAhv(rng: Rng, valid: Boolean): String {
+        val first12 = "756${rng.digits(9)}"
+        val check = EuIdChecksums.ean13Check(first12)
+        return if (valid) "$first12$check" else first12 + ((check + 1) % 10)
     }
 
     // --- HR OIB (11 digits, ISO 7064 MOD 11,10; no encoded DOB) ---
