@@ -19,7 +19,7 @@
     <ul>
       <li><b>IBAN</b> for the whole ISO 13616 registry — every European country plus 40+ worldwide (Türkiye, Saudi Arabia, UAE, Israel, Brazil, Pakistan, Egypt and more): correct national length and a passing ISO 7064 mod-97 check, with an invalid-checksum variant.</li>
       <li><b>Card (PAN)</b> — Luhn-valid, from payment-gateway <i>test</i> BIN ranges only (never real issuable cards), with CVV and expiry, plus a Luhn-invalid variant.</li>
-      <li><b>BIC/SWIFT</b> (ISO 9362), <b>National IDs</b> (NL BSN, DE Personalausweis, AU TFN, GB NINo, CY), and <b>VAT / ABN</b> tax identifiers — each with its real checksum.</li>
+      <li><b>BIC/SWIFT</b> (ISO 9362), <b>National IDs</b> for 25 countries (incl. Russian <b>ИНН / СНИЛС / ОГРН / ОГРНИП</b>, IT Codice Fiscale, and DOB-encoding schemes across the EU), and <b>VAT / ABN</b> tax identifiers — each with its real checksum.</li>
       <li><b>Passport MRZ</b> (ICAO 9303, TD3) for every country — valid field and composite check digits, with an invalid variant.</li>
       <li><b>Coherent personas</b> — name, date of birth, address, bank and tax identifiers, and a passport MRZ, all consistent for one person and country. Optional seed for reproducible fixtures.</li>
     </ul>
@@ -38,6 +38,10 @@
     ]]></description>
 
     <change-notes><![CDATA[
+    <h3>1.13.0</h3>
+    <ul>
+      <li>Russian identifiers (not in Western fakers): <b>ИНН</b> (individual &amp; legal), <b>СНИЛС</b>, <b>ОГРН</b> and <b>ОГРНИП</b> — each with its real checksum, plus a Russian persona (name, СНИЛС, ИНН, passport MRZ).</li>
+    </ul>
     <h3>1.12.0</h3>
     <ul>
       <li>More national IDs: <b>Iceland</b> (kennitala — weighted mod-11, first six digits the date of birth) and <b>Switzerland</b> (AHV/AVS — 756 prefix with an EAN-13 check). Each with its real checksum.</li>

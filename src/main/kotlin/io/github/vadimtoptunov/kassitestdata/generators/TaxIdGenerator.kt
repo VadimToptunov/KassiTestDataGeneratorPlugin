@@ -26,6 +26,7 @@ object TaxIdGenerator {
         Country.PT to Scheme("VAT (NIF)"),
         Country.FR to Scheme("VAT (TVA)"),
         Country.ES to Scheme("VAT (CIF)"),
+        Country.RU to Scheme("ИНН"),
     )
 
     /** Full identifier as presented (with country prefix for VAT). */
@@ -41,6 +42,7 @@ object TaxIdGenerator {
         Country.PT -> "PT" + portugueseVat(rng, valid)
         Country.FR -> "FR" + frenchVat(rng, valid)
         Country.ES -> "ES" + spanishCif(rng, valid)
+        Country.RU -> RussianIdGenerator.innIndividual(rng, valid) // ИНН has no country prefix
         else -> throw IllegalArgumentException("No tax scheme for ${country.code} in v1")
     }
 

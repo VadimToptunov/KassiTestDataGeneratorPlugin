@@ -106,6 +106,10 @@ enum class Country(
     VG("VG", "British Virgin Islands", false, NameLocale.EN),
     YE("YE", "Yemen", false, NameLocale.NEUTRAL),
 
+    // Russia — domestic identifiers (ИНН / СНИЛС / ОГРН…) have real checksums; no IBAN (domestic
+    // transfers use a 20-digit account + БИК, added later) — so like AU it forces the abstraction.
+    RU("RU", "Russia", false, NameLocale.RU),
+
     // Non-European case that forces a clean per-country abstraction (no IBAN, no VAT).
     AU("AU", "Australia", false, NameLocale.EN),
     ;
@@ -115,6 +119,6 @@ enum class Country(
     }
 }
 
-enum class NameLocale { EN, DE, NL, FR, IT, ES, PT, NEUTRAL }
+enum class NameLocale { EN, DE, NL, FR, IT, ES, PT, RU, NEUTRAL }
 
 enum class Gender { MALE, FEMALE }

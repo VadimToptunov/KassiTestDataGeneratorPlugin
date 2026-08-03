@@ -32,7 +32,7 @@ object MrzGenerator {
         "KZ" to "KAZ", "LB" to "LBN", "LC" to "LCA", "LY" to "LBY", "MN" to "MNG", "MR" to "MRT",
         "MU" to "MUS", "NI" to "NIC", "OM" to "OMN", "PK" to "PAK", "PS" to "PSE", "QA" to "QAT",
         "SA" to "SAU", "SC" to "SYC", "SD" to "SDN", "SO" to "SOM", "ST" to "STP", "SV" to "SLV",
-        "TL" to "TLS", "TN" to "TUN", "TR" to "TUR", "VG" to "VGB", "YE" to "YEM",
+        "TL" to "TLS", "TN" to "TUN", "TR" to "TUR", "VG" to "VGB", "YE" to "YEM", "RU" to "RUS",
     )
 
     fun alpha3(country: Country): String = ALPHA3[country.code] ?: country.code.padEnd(3, 'X')

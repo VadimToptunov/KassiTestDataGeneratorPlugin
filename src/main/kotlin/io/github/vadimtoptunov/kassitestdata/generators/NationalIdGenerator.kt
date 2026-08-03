@@ -2,6 +2,7 @@ package io.github.vadimtoptunov.kassitestdata.generators
 
 import io.github.vadimtoptunov.kassitestdata.algo.Checksums
 import io.github.vadimtoptunov.kassitestdata.algo.EuIdChecksums
+import io.github.vadimtoptunov.kassitestdata.algo.RuIdChecksums
 import io.github.vadimtoptunov.kassitestdata.core.Country
 import io.github.vadimtoptunov.kassitestdata.core.Gender
 import io.github.vadimtoptunov.kassitestdata.core.Rng
@@ -43,6 +44,7 @@ object NationalIdGenerator {
         Country.GR to Scheme("AMKA", Validation.CHECKSUM),
         Country.IS to Scheme("Kennitala", Validation.CHECKSUM),
         Country.CH to Scheme("AHV / AVS", Validation.CHECKSUM),
+        Country.RU to Scheme("СНИЛС", Validation.CHECKSUM),
     )
 
     /**
@@ -80,6 +82,7 @@ object NationalIdGenerator {
         Country.GR -> greekAmka(rng, valid, birth)
         Country.IS -> icelandicKennitala(rng, valid, birth)
         Country.CH -> swissAhv(rng, valid)
+        Country.RU -> RussianIdGenerator.snils(rng, valid)
         else -> throw IllegalArgumentException("No national ID scheme for ${country.code} in v1")
     }
 
@@ -106,6 +109,7 @@ object NationalIdGenerator {
         Country.GR -> EuIdChecksums.isValidGreekAmka(value)
         Country.IS -> EuIdChecksums.isValidIcelandicKennitala(value)
         Country.CH -> EuIdChecksums.isValidSwissAhv(value)
+        Country.RU -> RuIdChecksums.isValidSnils(value)
         else -> false
     }
 

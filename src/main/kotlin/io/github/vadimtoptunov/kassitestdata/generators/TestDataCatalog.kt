@@ -77,6 +77,13 @@ object TestDataCatalog {
             LeiGenerator.generate(Rng(seed), valid = true)
         }
 
+        // 5d. Russia — business registration IDs (personal СНИЛС + ИНН are surfaced via the loops above).
+        items += CatalogItem("Business", "ИНН (юр. лицо) · Russia") { seed ->
+            RussianIdGenerator.innLegal(Rng(seed), valid = true)
+        }
+        items += CatalogItem("Business", "ОГРН · Russia") { seed -> RussianIdGenerator.ogrn(Rng(seed), valid = true) }
+        items += CatalogItem("Business", "ОГРНИП · Russia") { seed -> RussianIdGenerator.ogrnip(Rng(seed), valid = true) }
+
         // 5c. Passport MRZ — ICAO 9303 TD3, every country, valid + invalid.
         for (country in Country.entries.sortedBy { it.displayName }) {
             items += CatalogItem("Passport", "Passport MRZ (${country.code}) · valid · ${country.displayName}") { seed ->

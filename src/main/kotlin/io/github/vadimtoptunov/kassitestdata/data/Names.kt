@@ -47,6 +47,11 @@ object Names {
             female = listOf("Maria", "Leonor", "Matilde", "Beatriz", "Carolina", "Ana", "Mariana", "Inês"),
             last = listOf("Silva", "Santos", "Ferreira", "Pereira", "Oliveira", "Costa", "Rodrigues", "Sousa"),
         ),
+        NameLocale.RU to Pool(
+            male = listOf("Aleksandr", "Dmitrii", "Maksim", "Sergei", "Andrei", "Ivan", "Mikhail", "Nikita"),
+            female = listOf("Anastasiia", "Mariia", "Anna", "Ekaterina", "Elena", "Olga", "Natalia", "Iuliia"),
+            last = listOf("Ivanov", "Smirnov", "Kuznetsov", "Popov", "Vasilev", "Petrov", "Sokolov", "Morozov"),
+        ),
         NameLocale.NEUTRAL to Pool(
             male = listOf("Alex", "Max", "Ivan", "Nikola", "Adam", "Erik", "Filip", "Luka"),
             female = listOf("Anna", "Maria", "Elena", "Sara", "Nina", "Eva", "Lena", "Sofia"),
