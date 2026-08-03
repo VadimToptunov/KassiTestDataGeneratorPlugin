@@ -38,6 +38,10 @@
     ]]></description>
 
     <change-notes><![CDATA[
+    <h3>1.15.0</h3>
+    <ul>
+      <li>Russian <b>IBAN</b> (national standard ГОСТ Р 57973-2017, 33 chars) — for testing systems that accept it; correct length and a passing mod-97. Note: not every validator ships RU in its country-length table. A Russian persona still uses the domestic БИК + account.</li>
+    </ul>
     <h3>1.14.0</h3>
     <ul>
       <li>Russian bank data: <b>БИК</b> (bank identifier) and a 20-digit <b>расчётный счёт</b> that keys correctly against its БИК (the real ЦБ РФ "ключевание" checksum). A Russian persona now carries a matching БИК + account.</li>

@@ -75,6 +75,13 @@ object PersonaGenerator {
         val bankLabel: String
         val bankValue: String
         when {
+            // Russia has an IBAN (national standard) but domestically uses БИК + account, which is the
+            // realistic identity for a persona — so this is checked before the generic IBAN branch.
+            country == Country.RU -> {
+                val bik = RussianIdGenerator.bik(rng)
+                bankLabel = "Bank (БИК+счёт):"
+                bankValue = "БИК $bik · Счёт ${RussianIdGenerator.account(rng, bik)}"
+            }
             isIban -> {
                 bankLabel = "IBAN:"
                 bankValue = BankAccountGenerator.ibanFormatted(country, rng, valid = true)
@@ -82,11 +89,6 @@ object PersonaGenerator {
             country == Country.AU -> {
                 bankLabel = "Bank (BSB):"
                 bankValue = BankAccountGenerator.auBsbAndAccount(rng)
-            }
-            country == Country.RU -> {
-                val bik = RussianIdGenerator.bik(rng)
-                bankLabel = "Bank (БИК+счёт):"
-                bankValue = "БИК $bik · Счёт ${RussianIdGenerator.account(rng, bik)}"
             }
             else -> {
                 bankLabel = "Bank:"

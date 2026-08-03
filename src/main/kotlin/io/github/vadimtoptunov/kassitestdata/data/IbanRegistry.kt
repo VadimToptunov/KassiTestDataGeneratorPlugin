@@ -122,6 +122,10 @@ object IbanRegistry {
         put(Country.TR, 26, "5n,1n,16c")
         put(Country.VG, 24, "4a,16n")
         put(Country.YE, 30, "4a,4n,18c")
+
+        // Russia — national IBAN standard (ГОСТ Р 57973-2017). Length + BBAN are well-defined and the
+        // mod-97 passes; note that not every validator ships RU in its country-length table.
+        put(Country.RU, 33, "14n,15c")
     }
 
     fun specFor(country: Country): IbanSpec? = specs[country]

@@ -26,8 +26,9 @@ class PersonaGeneratorTest {
             val p = PersonaGenerator.generate(country, seed = 777L)
             assertEquals(country, p.country)
 
-            // IBAN countries: the persona's IBAN must actually pass mod-97.
-            if (io.github.vadimtoptunov.kassitestdata.data.IbanRegistry.specFor(country) != null) {
+            // IBAN countries: the persona's IBAN must actually pass mod-97. RU is an IBAN country in the
+            // registry but its persona intentionally shows the domestic БИК + account, so skip it here.
+            if (io.github.vadimtoptunov.kassitestdata.data.IbanRegistry.specFor(country) != null && country != Country.RU) {
                 val iban = p.bankValue.replace(" ", "")
                 assertTrue(Checksums.isValidIbanMod97(iban), "${country.code} persona IBAN invalid: $iban")
             }
