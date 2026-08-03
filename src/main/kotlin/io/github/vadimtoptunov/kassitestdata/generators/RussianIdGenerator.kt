@@ -45,4 +45,19 @@ object RussianIdGenerator {
         val check = RuIdChecksums.ogrnipCheck(first14)
         return if (valid) "$first14$check" else first14 + ((check + 1) % 10)
     }
+
+    /** БИК — 9 digits, Russia prefix 04 (structural; there is no public check digit). */
+    fun bik(rng: Rng): String = "04" + rng.digits(7)
+
+    /** A 20-digit RUB individual current account (40817…810…) that keys correctly against [bik]. */
+    fun account(rng: Rng, bik: String): String {
+        val head = "40817810" // 5-digit balance account + 3-digit RUB currency
+        val tail = rng.digits(11) // positions 10–20
+        // Position 9 (0-based 8) is the control key: exactly one digit makes the keyed sum ≡ 0 (mod 10).
+        for (key in 0..9) {
+            val candidate = "$head$key$tail"
+            if (RuIdChecksums.accountKeySum(bik, candidate) == 0) return candidate
+        }
+        return "${head}0$tail" // unreachable: coefficient 3 is coprime to 10
+    }
 }

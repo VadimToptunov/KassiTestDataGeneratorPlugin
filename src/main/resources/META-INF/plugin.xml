@@ -38,6 +38,10 @@
     ]]></description>
 
     <change-notes><![CDATA[
+    <h3>1.14.0</h3>
+    <ul>
+      <li>Russian bank data: <b>БИК</b> (bank identifier) and a 20-digit <b>расчётный счёт</b> that keys correctly against its БИК (the real ЦБ РФ "ключевание" checksum). A Russian persona now carries a matching БИК + account.</li>
+    </ul>
     <h3>1.13.0</h3>
     <ul>
       <li>Russian identifiers (not in Western fakers): <b>ИНН</b> (individual &amp; legal), <b>СНИЛС</b>, <b>ОГРН</b> and <b>ОГРНИП</b> — each with its real checksum, plus a Russian persona (name, СНИЛС, ИНН, passport MRZ).</li>

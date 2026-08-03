@@ -6,6 +6,7 @@ import io.github.vadimtoptunov.kassitestdata.generators.BankAccountGenerator
 import io.github.vadimtoptunov.kassitestdata.generators.BicGenerator
 import io.github.vadimtoptunov.kassitestdata.generators.MrzGenerator
 import io.github.vadimtoptunov.kassitestdata.generators.NationalIdGenerator
+import io.github.vadimtoptunov.kassitestdata.generators.RussianIdGenerator
 import io.github.vadimtoptunov.kassitestdata.generators.TaxIdGenerator
 import java.time.LocalDate
 import java.time.Year
@@ -81,6 +82,11 @@ object PersonaGenerator {
             country == Country.AU -> {
                 bankLabel = "Bank (BSB):"
                 bankValue = BankAccountGenerator.auBsbAndAccount(rng)
+            }
+            country == Country.RU -> {
+                val bik = RussianIdGenerator.bik(rng)
+                bankLabel = "Bank (БИК+счёт):"
+                bankValue = "БИК $bik · Счёт ${RussianIdGenerator.account(rng, bik)}"
             }
             else -> {
                 bankLabel = "Bank:"

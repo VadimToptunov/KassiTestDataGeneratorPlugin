@@ -64,6 +64,29 @@ object RuIdChecksums {
         return ogrnCheck(value.substring(0, 12)) == (value[12] - '0')
     }
 
+    // ---- Bank account "ключевание" (20-digit account keyed against a 9-digit БИК) ----
+    private val ACCOUNT_WEIGHTS = intArrayOf(7, 1, 3, 7, 1, 3, 7, 1, 3, 7, 1, 3, 7, 1, 3, 7, 1, 3, 7, 1, 3, 7, 1)
+
+    /** The 3-digit prefix prepended to the account before keying: for correspondent accounts (30xxx)
+     *  it is `0` + БИК digits 5–6; otherwise the last 3 digits of the БИК. */
+    private fun accountPrefix(bik: String, account: String): String =
+        if (account.startsWith("301") || account.startsWith("303")) "0" + bik.substring(4, 6)
+        else bik.substring(6, 9)
+
+    /** Weighted sum mod 10 of (prefix + account); 0 means the account keys correctly to the БИК. */
+    fun accountKeySum(bik: String, account: String): Int {
+        val s = accountPrefix(bik, account) + account
+        var sum = 0
+        for (i in 0..22) sum += (s[i] - '0') * ACCOUNT_WEIGHTS[i]
+        return sum % 10
+    }
+
+    fun isValidRussianAccount(bik: String, account: String): Boolean {
+        if (bik.length != 9 || account.length != 20) return false
+        if (!bik.all { it in '0'..'9' } || !account.all { it in '0'..'9' }) return false
+        return accountKeySum(bik, account) == 0
+    }
+
     // ---- ОГРНИП (15 digits; check = (first 14 mod 13) mod 10) ----
     fun ogrnipCheck(first14: String): Int = ((first14.toLong() % 13) % 10).toInt()
 

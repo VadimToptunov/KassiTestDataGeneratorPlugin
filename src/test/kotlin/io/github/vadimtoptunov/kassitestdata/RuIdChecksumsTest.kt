@@ -42,6 +42,28 @@ class RuIdChecksumsTest {
     // ---- Generator round-trips: valid passes, invalid fails ----
 
     @Test
+    fun `bank account keying reference (Sberbank correspondent account)`() {
+        // БИК 044525225 + корсчёт 30101810400000000225 — weighted sum 110, 110 % 10 == 0
+        assertTrue(RuIdChecksums.isValidRussianAccount("044525225", "30101810400000000225"))
+        assertFalse(RuIdChecksums.isValidRussianAccount("044525225", "30101810400000000226"))
+    }
+
+    @Test
+    fun `generated account keys correctly to its БИК`() {
+        val rng = Rng(77L)
+        repeat(100) {
+            val bik = RussianIdGenerator.bik(rng)
+            val account = RussianIdGenerator.account(rng, bik)
+            assertTrue(bik.length == 9 && bik.startsWith("04"), bik)
+            assertTrue(RuIdChecksums.isValidRussianAccount(bik, account), "$bik / $account")
+            // corrupt the position-9 control key -> no longer keys to the same БИК
+            val badKey = ((account[8] - '0') + 1) % 10
+            val corrupted = account.substring(0, 8) + badKey + account.substring(9)
+            assertFalse(RuIdChecksums.isValidRussianAccount(bik, corrupted), corrupted)
+        }
+    }
+
+    @Test
     fun `all Russian generators round-trip`() {
         val rng = Rng(2024L)
         repeat(100) {
@@ -64,6 +86,9 @@ class RuIdChecksumsTest {
             val p = PersonaGenerator.generate(Country.RU, seed)
             assertTrue(NationalIdGenerator.isValid(Country.RU, p.nationalId!!), "СНИЛС: ${p.nationalId}")
             assertTrue(RuIdChecksums.isValidInnIndividual(p.taxId!!), "ИНН: ${p.taxId}")
+            // bank line: "БИК <9> · Счёт <20>" — the account must key to the БИК
+            val m = Regex("БИК (\\d{9}) · Счёт (\\d{20})").find(p.bankValue)!!
+            assertTrue(RuIdChecksums.isValidRussianAccount(m.groupValues[1], m.groupValues[2]), p.bankValue)
         }
     }
 

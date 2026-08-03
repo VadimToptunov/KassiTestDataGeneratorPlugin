@@ -83,6 +83,12 @@ object TestDataCatalog {
         }
         items += CatalogItem("Business", "ОГРН · Russia") { seed -> RussianIdGenerator.ogrn(Rng(seed), valid = true) }
         items += CatalogItem("Business", "ОГРНИП · Russia") { seed -> RussianIdGenerator.ogrnip(Rng(seed), valid = true) }
+        items += CatalogItem("Bank account", "БИК · Russia") { seed -> RussianIdGenerator.bik(Rng(seed)) }
+        items += CatalogItem("Bank account", "Счёт + БИК (keyed) · Russia") { seed ->
+            val rng = Rng(seed)
+            val bik = RussianIdGenerator.bik(rng)
+            "БИК $bik · Счёт ${RussianIdGenerator.account(rng, bik)}"
+        }
 
         // 5c. Passport MRZ — ICAO 9303 TD3, every country, valid + invalid.
         for (country in Country.entries.sortedBy { it.displayName }) {
