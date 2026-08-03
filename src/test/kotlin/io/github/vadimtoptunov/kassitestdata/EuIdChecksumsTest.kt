@@ -235,6 +235,40 @@ class EuIdChecksumsTest {
     }
 
     @Test
+    fun `Estonia isikukood two-round mod-11 reference`() {
+        assertTrue(EuIdChecksums.isValidEstonianLithuanian("37605030299")) // documented Estonian code
+        assertFalse(EuIdChecksums.isValidEstonianLithuanian("37605030298"))
+    }
+
+    @Test
+    fun `Czech Slovak rodne cislo divisible-by-11 reference`() {
+        assertTrue(EuIdChecksums.isValidCzechSlovakBirthNumber("7103192745")) // 7103192745 % 11 == 0
+        assertFalse(EuIdChecksums.isValidCzechSlovakBirthNumber("7103192746"))
+    }
+
+    @Test
+    fun `EE LT CZ SK personas encode DOB and sex`() {
+        for (country in listOf(Country.EE, Country.LT, Country.CZ, Country.SK)) {
+            for (seed in 1L..8L) {
+                val p = io.github.vadimtoptunov.kassitestdata.core.PersonaGenerator.generate(country, seed)
+                val id = p.nationalId!!
+                assertTrue(NationalIdGenerator.isValid(country, id), "$country: $id")
+                val yy = (p.dateOfBirth.year % 100).toString().padStart(2, '0')
+                val male = p.gender == io.github.vadimtoptunov.kassitestdata.core.Gender.MALE
+                if (country == Country.EE || country == Country.LT) {
+                    assertEquals(yy, id.substring(1, 3), id) // G YY MM DD ...
+                    assertEquals(male, (id[0] - '0') % 2 == 1, id) // G odd = male
+                } else { // CZ / SK: YY MM(+offset) DD ...
+                    assertEquals(yy, id.substring(0, 2), id)
+                    val rawMonth = id.substring(2, 4).toInt()
+                    val female = rawMonth in 51..62 || rawMonth in 71..82
+                    assertEquals(!male, female, id)
+                }
+            }
+        }
+    }
+
+    @Test
     fun `PESEL encodes the persona date of birth`() {
         val p = io.github.vadimtoptunov.kassitestdata.core.PersonaGenerator.generate(Country.PL, seed = 123L)
         val pesel = p.nationalId!!

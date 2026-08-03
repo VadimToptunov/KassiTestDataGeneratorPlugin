@@ -33,6 +33,10 @@ object NationalIdGenerator {
         Country.FI to Scheme("HETU", Validation.CHECKSUM),
         Country.NO to Scheme("Fødselsnummer", Validation.CHECKSUM),
         Country.IT to Scheme("Codice Fiscale", Validation.CHECKSUM),
+        Country.EE to Scheme("Isikukood", Validation.CHECKSUM),
+        Country.LT to Scheme("Asmens kodas", Validation.CHECKSUM),
+        Country.CZ to Scheme("Rodné číslo", Validation.CHECKSUM),
+        Country.SK to Scheme("Rodné číslo", Validation.CHECKSUM),
     )
 
     /**
@@ -62,6 +66,8 @@ object NationalIdGenerator {
         Country.FI -> finnishHetu(rng, valid, birth, gender)
         Country.NO -> norwegianFnr(rng, valid, birth, gender)
         Country.IT -> italianCodiceFiscale(rng, valid, birth, gender, surname, givenName)
+        Country.EE, Country.LT -> estonianLithuanianCode(rng, valid, birth, gender)
+        Country.CZ, Country.SK -> czechSlovakBirthNumber(rng, valid, birth, gender)
         else -> throw IllegalArgumentException("No national ID scheme for ${country.code} in v1")
     }
 
@@ -80,6 +86,8 @@ object NationalIdGenerator {
         Country.FI -> EuIdChecksums.isValidFinnishHetu(value)
         Country.NO -> EuIdChecksums.isValidNorwegianFnr(value)
         Country.IT -> EuIdChecksums.isValidItalianCf(value)
+        Country.EE, Country.LT -> EuIdChecksums.isValidEstonianLithuanian(value)
+        Country.CZ, Country.SK -> EuIdChecksums.isValidCzechSlovakBirthNumber(value)
         else -> false
     }
 
@@ -302,6 +310,44 @@ object NationalIdGenerator {
         val consonants = cfConsonants(n)
         val picked = if (consonants.length >= 4) "${consonants[0]}${consonants[2]}${consonants[3]}" else consonants
         return (picked + cfVowels(n) + "XXX").substring(0, 3)
+    }
+
+    // --- EE / LT isikukood (G + YYMMDD + serial + two-round mod-11 check; G encodes century + sex) ---
+    private fun estonianLithuanianCode(rng: Rng, valid: Boolean, birth: LocalDate?, gender: Gender?): String {
+        val sex = gender ?: randomGender(rng)
+        val dob = birth ?: randomDob(rng)
+        val male = sex == Gender.MALE
+        val g = when (dob.year / 100) {
+            18 -> if (male) 1 else 2
+            20 -> if (male) 5 else 6
+            else -> if (male) 3 else 4 // 1900s
+        }
+        val yy = (dob.year % 100).toString().padStart(2, '0')
+        val mm = dob.monthValue.toString().padStart(2, '0')
+        val dd = dob.dayOfMonth.toString().padStart(2, '0')
+        val first10 = "$g$yy$mm$dd${rng.digits(3)}"
+        val check = EuIdChecksums.estonianLithuanianCheck(first10)
+        return if (valid) "$first10$check" else first10 + ((check + 1) % 10)
+    }
+
+    // --- CZ / SK rodné číslo (YY MM(+offset) DD SSS C, the whole 10 digits divisible by 11) ---
+    private fun czechSlovakBirthNumber(rng: Rng, valid: Boolean, birth: LocalDate?, gender: Gender?): String {
+        val sex = gender ?: randomGender(rng)
+        val dob = birth ?: randomDob(rng)
+        val male = sex == Gender.MALE
+        val monthOffset = when {
+            dob.year >= 2000 -> if (male) 20 else 70
+            else -> if (male) 0 else 50
+        }
+        val yy = (dob.year % 100).toString().padStart(2, '0')
+        val mm = (dob.monthValue + monthOffset).toString().padStart(2, '0')
+        val dd = dob.dayOfMonth.toString().padStart(2, '0')
+        while (true) {
+            val first9 = "$yy$mm$dd${rng.digits(3)}"
+            val check = (first9.toLong() % 11).toInt() // C ≡ firstNine (mod 11); 10 has no single-digit check
+            if (check == 10) continue
+            return if (valid) "$first9$check" else first9 + ((check + 1) % 10)
+        }
     }
 
     private fun randomGender(rng: Rng): Gender = if (rng.boolean()) Gender.MALE else Gender.FEMALE

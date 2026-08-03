@@ -184,6 +184,40 @@ object EuIdChecksums {
         return spanishCifControl(digits) == (value[8] - '0')
     }
 
+    // ---- Estonia / Lithuania — isikukood / asmens kodas (11 digits, two-round mod 11; encodes DOB + sex) ----
+    private val EE_LT_W1 = intArrayOf(1, 2, 3, 4, 5, 6, 7, 8, 9, 1)
+    private val EE_LT_W2 = intArrayOf(3, 4, 5, 6, 7, 8, 9, 1, 2, 3)
+
+    fun estonianLithuanianCheck(first10: String): Int {
+        var s1 = 0
+        for (i in 0..9) s1 += (first10[i] - '0') * EE_LT_W1[i]
+        val r1 = s1 % 11
+        if (r1 < 10) return r1
+        var s2 = 0
+        for (i in 0..9) s2 += (first10[i] - '0') * EE_LT_W2[i]
+        val r2 = s2 % 11
+        return if (r2 < 10) r2 else 0
+    }
+
+    fun isValidEstonianLithuanian(value: String): Boolean {
+        if (value.length != 11 || !value.all { it in '0'..'9' }) return false
+        if (value[0] !in '1'..'8') return false // gender/century digit
+        return estonianLithuanianCheck(value.substring(0, 10)) == (value[10] - '0')
+    }
+
+    // ---- Czechia / Slovakia — rodné číslo (10 digits divisible by 11; encodes DOB + sex) ----
+    fun isValidCzechSlovakBirthNumber(value: String): Boolean {
+        if (value.length != 10 || !value.all { it in '0'..'9' }) return false
+        if (value.toLong() % 11 != 0L) return false
+        var month = value.substring(2, 4).toInt()
+        when (month) {
+            in 51..62 -> month -= 50 // women, 1900s
+            in 21..32 -> month -= 20 // men, 2000s
+            in 71..82 -> month -= 70 // women, 2000s
+        }
+        return month in 1..12
+    }
+
     // ---- Italy — Codice Fiscale (control character over 15 chars, mod 26) ----
     private val CF_ODD = mapOf(
         '0' to 1, '1' to 0, '2' to 5, '3' to 7, '4' to 9, '5' to 13, '6' to 15, '7' to 17, '8' to 19, '9' to 21,

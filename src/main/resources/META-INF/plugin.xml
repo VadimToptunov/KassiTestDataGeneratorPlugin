@@ -38,6 +38,10 @@
     ]]></description>
 
     <change-notes><![CDATA[
+    <h3>1.9.0</h3>
+    <ul>
+      <li>More national IDs: <b>Estonia</b> and <b>Lithuania</b> (isikukood / asmens kodas, two-round mod-11) and <b>Czechia</b> and <b>Slovakia</b> (rodné číslo, divisible by 11) — each with its real checksum and encoding date of birth &amp; sex, kept consistent with the persona.</li>
+    </ul>
     <h3>1.8.0</h3>
     <ul>
       <li><b>Passport MRZ</b> (ICAO 9303, TD3) for <b>every country</b>: a two-line Machine Readable Zone with valid field and composite check digits — passes an MRZ validator. In a persona it encodes that person's name, nationality, date of birth and sex, so the passport is consistent with the rest of the identity.</li>
