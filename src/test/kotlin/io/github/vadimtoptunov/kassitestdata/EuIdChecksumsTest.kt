@@ -269,6 +269,42 @@ class EuIdChecksumsTest {
     }
 
     @Test
+    fun `Romania CNP weighted mod-11 reference`() {
+        // Built per the published 279146358279 key: 1|80|05|15|10|001 -> weighted sum 113, 113 % 11 = 3.
+        assertTrue(EuIdChecksums.isValidRomanianCnp("1800515100013"))
+        assertFalse(EuIdChecksums.isValidRomanianCnp("1800515100014"))
+    }
+
+    @Test
+    fun `Greece AMKA is Luhn-validated`() {
+        val rng = Rng(9L)
+        repeat(50) {
+            assertTrue(NationalIdGenerator.isValid(Country.GR, NationalIdGenerator.generate(Country.GR, rng, valid = true)))
+            assertFalse(NationalIdGenerator.isValid(Country.GR, NationalIdGenerator.generate(Country.GR, rng, valid = false)))
+        }
+    }
+
+    @Test
+    fun `RO and GR personas encode the date of birth`() {
+        for (seed in 1L..8L) {
+            val ro = io.github.vadimtoptunov.kassitestdata.core.PersonaGenerator.generate(Country.RO, seed)
+            val cnp = ro.nationalId!!
+            assertTrue(NationalIdGenerator.isValid(Country.RO, cnp), cnp)
+            assertEquals((ro.dateOfBirth.year % 100).toString().padStart(2, '0'), cnp.substring(1, 3), cnp)
+            val roMale = ro.gender == io.github.vadimtoptunov.kassitestdata.core.Gender.MALE
+            assertEquals(roMale, (cnp[0] - '0') % 2 == 1, cnp) // S odd = male
+
+            val gr = io.github.vadimtoptunov.kassitestdata.core.PersonaGenerator.generate(Country.GR, seed)
+            val amka = gr.nationalId!!
+            assertTrue(NationalIdGenerator.isValid(Country.GR, amka), amka)
+            val ddmmyy = gr.dateOfBirth.dayOfMonth.toString().padStart(2, '0') +
+                gr.dateOfBirth.monthValue.toString().padStart(2, '0') +
+                (gr.dateOfBirth.year % 100).toString().padStart(2, '0')
+            assertEquals(ddmmyy, amka.substring(0, 6), amka)
+        }
+    }
+
+    @Test
     fun `Bulgaria EGN weighted mod-11 reference`() {
         assertTrue(EuIdChecksums.isValidBulgarianEgn("7523169263")) // Wikipedia EGN example
         assertFalse(EuIdChecksums.isValidBulgarianEgn("7523169264"))

@@ -39,6 +39,8 @@ object NationalIdGenerator {
         Country.SK to Scheme("Rodné číslo", Validation.CHECKSUM),
         Country.BG to Scheme("EGN", Validation.CHECKSUM),
         Country.HR to Scheme("OIB", Validation.CHECKSUM),
+        Country.RO to Scheme("CNP", Validation.CHECKSUM),
+        Country.GR to Scheme("AMKA", Validation.CHECKSUM),
     )
 
     /**
@@ -72,6 +74,8 @@ object NationalIdGenerator {
         Country.CZ, Country.SK -> czechSlovakBirthNumber(rng, valid, birth, gender)
         Country.BG -> bulgarianEgn(rng, valid, birth, gender)
         Country.HR -> croatianOib(rng, valid)
+        Country.RO -> romanianCnp(rng, valid, birth, gender)
+        Country.GR -> greekAmka(rng, valid, birth)
         else -> throw IllegalArgumentException("No national ID scheme for ${country.code} in v1")
     }
 
@@ -94,6 +98,8 @@ object NationalIdGenerator {
         Country.CZ, Country.SK -> EuIdChecksums.isValidCzechSlovakBirthNumber(value)
         Country.BG -> EuIdChecksums.isValidBulgarianEgn(value)
         Country.HR -> EuIdChecksums.isValidCroatianOib(value)
+        Country.RO -> EuIdChecksums.isValidRomanianCnp(value)
+        Country.GR -> EuIdChecksums.isValidGreekAmka(value)
         else -> false
     }
 
@@ -373,6 +379,37 @@ object NationalIdGenerator {
         val first9 = "$yy$mm$dd${rng.digits(2)}$sexDigit"
         val check = EuIdChecksums.bulgarianEgnCheck(first9)
         return if (valid) "$first9$check" else first9 + ((check + 1) % 10)
+    }
+
+    // --- RO CNP (S YY MM DD JJ NNN C; weighted mod-11; S encodes century + sex) ---
+    private fun romanianCnp(rng: Rng, valid: Boolean, birth: LocalDate?, gender: Gender?): String {
+        val sex = gender ?: randomGender(rng)
+        val dob = birth ?: randomDob(rng)
+        val male = sex == Gender.MALE
+        val s = when (dob.year / 100) {
+            18 -> if (male) 3 else 4
+            20 -> if (male) 5 else 6
+            else -> if (male) 1 else 2 // 1900s
+        }
+        val yy = (dob.year % 100).toString().padStart(2, '0')
+        val mm = dob.monthValue.toString().padStart(2, '0')
+        val dd = dob.dayOfMonth.toString().padStart(2, '0')
+        val jj = rng.intInRange(1, 46).toString().padStart(2, '0') // county
+        val nnn = rng.intInRange(1, 999).toString().padStart(3, '0')
+        val first12 = "$s$yy$mm$dd$jj$nnn"
+        val check = EuIdChecksums.romanianCnpCheck(first12)
+        return if (valid) "$first12$check" else first12 + ((check + 1) % 10)
+    }
+
+    // --- GR AMKA (DDMMYY + 4 digits + Luhn; the first 6 are the date of birth) ---
+    private fun greekAmka(rng: Rng, valid: Boolean, birth: LocalDate?): String {
+        val dob = birth ?: randomDob(rng)
+        val dd = dob.dayOfMonth.toString().padStart(2, '0')
+        val mm = dob.monthValue.toString().padStart(2, '0')
+        val yy = (dob.year % 100).toString().padStart(2, '0')
+        val first10 = "$dd$mm$yy${rng.digits(4)}"
+        val check = Checksums.luhnCheckDigit(first10)
+        return if (valid) "$first10$check" else first10 + ((check + 1) % 10)
     }
 
     // --- HR OIB (11 digits, ISO 7064 MOD 11,10; no encoded DOB) ---

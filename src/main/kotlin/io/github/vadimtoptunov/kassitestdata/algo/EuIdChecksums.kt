@@ -218,6 +218,26 @@ object EuIdChecksums {
         return month in 1..12
     }
 
+    // ---- Romania — CNP (13 digits, weighted mod 11 with the published 279146358279 key; DOB + sex) ----
+    private val RO_CNP_WEIGHTS = intArrayOf(2, 7, 9, 1, 4, 6, 3, 5, 8, 2, 7, 9)
+
+    fun romanianCnpCheck(first12: String): Int {
+        var sum = 0
+        for (i in 0..11) sum += (first12[i] - '0') * RO_CNP_WEIGHTS[i]
+        val r = sum % 11
+        return if (r == 10) 1 else r
+    }
+
+    fun isValidRomanianCnp(value: String): Boolean {
+        if (value.length != 13 || !value.all { it in '0'..'9' }) return false
+        if (value[0] !in '1'..'9') return false // sex/century digit
+        return romanianCnpCheck(value.substring(0, 12)) == (value[12] - '0')
+    }
+
+    // ---- Greece — AMKA (11 digits, Luhn; the first 6 are the date of birth) ----
+    fun isValidGreekAmka(value: String): Boolean =
+        value.length == 11 && value.all { it in '0'..'9' } && Checksums.isLuhnValid(value)
+
     // ---- Bulgaria — EGN (10 digits, weighted mod 11; encodes DOB + sex) ----
     private val BG_EGN_WEIGHTS = intArrayOf(2, 4, 8, 5, 10, 9, 7, 3, 6)
 
