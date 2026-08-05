@@ -40,6 +40,10 @@
     ]]></description>
 
     <change-notes><![CDATA[
+    <h3>1.18.0</h3>
+    <ul>
+      <li>Easier picking: <b>Insert Test Data</b> is now a two-level menu — choose a category (Persona, Bank account, Card, National ID, Passport, Phone…) and then the item (with search) — instead of one long flat list.</li>
+    </ul>
     <h3>1.17.0</h3>
     <ul>
       <li>More identifiers with real checksums: <b>ISIN</b> (securities, ISO 6166), <b>IMEI</b> (devices) and <b>EAN-13</b> (product barcodes) — each valid, each with an invalid variant.</li>
