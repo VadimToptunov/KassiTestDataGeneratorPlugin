@@ -72,9 +72,18 @@ object TestDataCatalog {
             }
         }
 
-        // 5b. LEI — Legal Entity Identifier (ISO 17442), country-agnostic business ID.
+        // 5b. Country-agnostic identifiers with real checksums.
         items += CatalogItem("Business", "LEI · Legal Entity Identifier (ISO 17442)") { seed ->
             LeiGenerator.generate(Rng(seed), valid = true)
+        }
+        items += CatalogItem("Identifier", "ISIN · Security (ISO 6166) · valid") { seed ->
+            IdentifierGenerator.isin(Rng(seed), valid = true)
+        }
+        items += CatalogItem("Identifier", "IMEI · Device · valid") { seed ->
+            IdentifierGenerator.imei(Rng(seed), valid = true)
+        }
+        items += CatalogItem("Identifier", "EAN-13 · Product barcode · valid") { seed ->
+            IdentifierGenerator.ean13(Rng(seed), valid = true)
         }
 
         // 5d. Russia — business registration IDs (personal СНИЛС + ИНН are surfaced via the loops above).

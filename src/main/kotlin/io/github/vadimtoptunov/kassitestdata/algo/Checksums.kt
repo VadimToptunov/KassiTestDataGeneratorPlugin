@@ -93,6 +93,19 @@ object Checksums {
         return sum % 10 == 0
     }
 
+    /** ISIN (ISO 6166) check digit: letters expand to two digits (A=10..Z=35), then Luhn over the string. */
+    fun isinCheckDigit(first11: String): Int = luhnCheckDigit(expandIsin(first11))
+
+    fun isValidIsin(value: String): Boolean {
+        val s = value.uppercase()
+        if (!Regex("^[A-Z]{2}[A-Z0-9]{9}[0-9]$").matches(s)) return false
+        return isinCheckDigit(s.substring(0, 11)) == (s[11] - '0')
+    }
+
+    private fun expandIsin(s: String): String = buildString {
+        for (c in s.uppercase()) if (c in '0'..'9') append(c) else append(c - 'A' + 10)
+    }
+
     // ---------------------------------------------------------------------
     // Dutch 11-proef — BSN (national ID) and legacy BTW/RSIN (tax).
     // ---------------------------------------------------------------------
