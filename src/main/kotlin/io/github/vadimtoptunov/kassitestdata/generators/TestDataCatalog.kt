@@ -100,6 +100,16 @@ object TestDataCatalog {
             }
         }
 
+        // 5e. Phone — valid E.164 test numbers per country (libphonenumber metadata), valid + invalid.
+        for (country in Country.entries.filter { PhoneGenerator.isSupported(it) }.sortedBy { it.displayName }) {
+            items += CatalogItem("Phone", "Phone (${country.code}) · valid · ${country.displayName}") { seed ->
+                PhoneGenerator.generate(country, Rng(seed), valid = true)
+            }
+            items += CatalogItem("Phone", "Phone (${country.code}) · invalid · ${country.displayName}") { seed ->
+                PhoneGenerator.generate(country, Rng(seed), valid = false)
+            }
+        }
+
         // 6. Persona — coherent bundle, every country.
         for (country in Country.entries.sortedBy { it.displayName }) {
             items += CatalogItem("Persona", "Persona (${country.code}) · ${country.displayName}") { seed ->

@@ -7,8 +7,8 @@ plugins {
 }
 
 group = "io.github.vadimtoptunov"
-// Overridable by CI at release time: ./gradlew publishPlugin -PpluginVersion=1.15.0
-version = (findProperty("pluginVersion") as String?) ?: "1.15.0"
+// Overridable by CI at release time: ./gradlew publishPlugin -PpluginVersion=1.16.0
+version = (findProperty("pluginVersion") as String?) ?: "1.16.0"
 
 repositories {
     mavenCentral()
@@ -22,6 +22,8 @@ intellij {
 }
 
 dependencies {
+    // Authoritative, offline phone-number metadata (per-country plans) — bundled into the plugin.
+    implementation("com.googlecode.libphonenumber:libphonenumber:8.13.52")
     testImplementation(kotlin("test"))
     testImplementation("org.junit.jupiter:junit-jupiter:5.10.2")
 }

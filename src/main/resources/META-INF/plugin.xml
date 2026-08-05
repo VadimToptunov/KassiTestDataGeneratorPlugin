@@ -21,6 +21,7 @@
       <li><b>Card (PAN)</b> — Luhn-valid, from payment-gateway <i>test</i> BIN ranges only (never real issuable cards), with CVV and expiry, plus a Luhn-invalid variant.</li>
       <li><b>BIC/SWIFT</b> (ISO 9362), <b>National IDs</b> for 25 countries (incl. Russian <b>ИНН / СНИЛС / ОГРН / ОГРНИП</b>, IT Codice Fiscale, and DOB-encoding schemes across the EU), and <b>VAT / ABN</b> tax identifiers — each with its real checksum.</li>
       <li><b>Passport MRZ</b> (ICAO 9303, TD3) for every country — valid field and composite check digits, with an invalid variant.</li>
+      <li><b>Phone numbers</b> by country — valid E.164 numbers backed by offline libphonenumber metadata, with an invalid variant.</li>
       <li><b>Coherent personas</b> — name, date of birth, address, bank and tax identifiers, and a passport MRZ, all consistent for one person and country. Optional seed for reproducible fixtures.</li>
     </ul>
     <p>
@@ -38,6 +39,10 @@
     ]]></description>
 
     <change-notes><![CDATA[
+    <h3>1.16.0</h3>
+    <ul>
+      <li>Phone numbers by country: valid E.164 test numbers for every country, backed by offline Google libphonenumber metadata (with an invalid variant). Personas now carry a phone number too.</li>
+    </ul>
     <h3>1.15.0</h3>
     <ul>
       <li>Russian <b>IBAN</b> (national standard ГОСТ Р 57973-2017, 33 chars) — for testing systems that accept it; correct length and a passing mod-97. Note: not every validator ships RU in its country-length table. A Russian persona still uses the domestic БИК + account.</li>
