@@ -40,6 +40,10 @@
     ]]></description>
 
     <change-notes><![CDATA[
+    <h3>1.20.0</h3>
+    <ul>
+      <li>Balkan national IDs: <b>JMBG</b> — the shared ex-Yugoslav 13-digit citizen number for <b>Serbia, Slovenia, Montenegro, North Macedonia and Bosnia and Herzegovina</b>, with the real mod-11 check digit and per-country region codes.</li>
+    </ul>
     <h3>1.19.0</h3>
     <ul>
       <li>More identifiers with real check digits: <b>VIN</b> (vehicle, ISO 3779 — position-9 check character), <b>ISBN-10</b> (mod-11, incl. the 'X' check) and <b>ISBN-13</b> (978/979, EAN-13 check).</li>
