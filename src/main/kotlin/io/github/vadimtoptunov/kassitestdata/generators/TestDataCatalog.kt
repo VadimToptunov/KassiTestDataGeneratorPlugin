@@ -65,6 +65,13 @@ object TestDataCatalog {
             }
         }
 
+        // 4b. JMBG — the shared ex-Yugoslav citizen number (one mod-11 algorithm, per-area region code).
+        for (area in JmbgGenerator.Area.entries) {
+            items += CatalogItem("National ID", "JMBG (${area.code}) · ${area.displayName}") { seed ->
+                JmbgGenerator.generate(area, Rng(seed), valid = true)
+            }
+        }
+
         // 5. Tax / VAT — supported schemes.
         for ((country, scheme) in TaxIdGenerator.supported) {
             items += CatalogItem("Tax ID", "${scheme.label} (${country.code}) · ${country.displayName}") { seed ->

@@ -302,4 +302,31 @@ object Checksums {
         if (last !in '0'..'9' && last != 'X') return false
         return isbn10CheckChar(s.substring(0, 9)) == last
     }
+
+    // ---------------------------------------------------------------------
+    // JMBG — the ex-Yugoslav 13-digit citizen number (RS/SI/ME/MK/BA), weighted mod-11.
+    // ---------------------------------------------------------------------
+
+    private val JMBG_WEIGHTS = intArrayOf(7, 6, 5, 4, 3, 2, 7, 6, 5, 4, 3, 2)
+
+    /**
+     * JMBG check digit for the first 12 digits: m = 11 - (Σ digit·weight mod 11).
+     * m == 11 maps to 0; m == 10 is an unassignable combination and returns null.
+     */
+    fun jmbgCheckDigit(first12: String): Int? {
+        var sum = 0
+        for (i in 0 until 12) sum += (first12[i] - '0') * JMBG_WEIGHTS[i]
+        return when (val m = 11 - (sum % 11)) {
+            11 -> 0
+            10 -> null
+            else -> m
+        }
+    }
+
+    /** Validate a full 13-digit JMBG by its check digit. */
+    fun isValidJmbg(value: String): Boolean {
+        if (value.length != 13 || !value.all { it in '0'..'9' }) return false
+        val check = jmbgCheckDigit(value.substring(0, 12)) ?: return false
+        return check == (value[12] - '0')
+    }
 }
