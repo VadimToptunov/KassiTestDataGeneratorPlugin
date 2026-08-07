@@ -85,6 +85,15 @@ object TestDataCatalog {
         items += CatalogItem("Identifier", "EAN-13 · Product barcode · valid") { seed ->
             IdentifierGenerator.ean13(Rng(seed), valid = true)
         }
+        items += CatalogItem("Identifier", "VIN · Vehicle (ISO 3779) · valid") { seed ->
+            IdentifierGenerator.vin(Rng(seed), valid = true)
+        }
+        items += CatalogItem("Identifier", "ISBN-10 · Book · valid") { seed ->
+            IdentifierGenerator.isbn10(Rng(seed), valid = true)
+        }
+        items += CatalogItem("Identifier", "ISBN-13 · Book · valid") { seed ->
+            IdentifierGenerator.isbn13(Rng(seed), valid = true)
+        }
 
         // 5d. Russia — business registration IDs (personal СНИЛС + ИНН are surfaced via the loops above).
         items += CatalogItem("Business", "ИНН (юр. лицо) · Russia") { seed ->
