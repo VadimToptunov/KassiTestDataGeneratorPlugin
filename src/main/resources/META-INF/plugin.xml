@@ -40,6 +40,10 @@
     ]]></description>
 
     <change-notes><![CDATA[
+    <h3>1.21.0</h3>
+    <ul>
+      <li>Crypto addresses with real checksums: <b>Bitcoin</b> (legacy P2PKH, Base58Check over double-SHA-256) and <b>Ethereum</b> (EIP-55 mixed-case checksum, real Keccak-256).</li>
+    </ul>
     <h3>1.20.0</h3>
     <ul>
       <li>Balkan national IDs: <b>JMBG</b> — the shared ex-Yugoslav 13-digit citizen number for <b>Serbia, Slovenia, Montenegro, North Macedonia and Bosnia and Herzegovina</b>, with the real mod-11 check digit and per-country region codes.</li>

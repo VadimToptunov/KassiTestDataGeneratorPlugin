@@ -49,7 +49,7 @@ class InsertTestDataAction : AnAction() {
     private companion object {
         // Most-used first; anything not listed is appended alphabetically.
         val GROUP_ORDER = listOf(
-            "Persona", "Bank account", "Card", "BIC", "National ID", "Tax ID", "Identifier", "Business", "Phone", "Passport",
+            "Persona", "Bank account", "Card", "BIC", "National ID", "Tax ID", "Identifier", "Crypto", "Business", "Phone", "Passport",
         )
     }
 }

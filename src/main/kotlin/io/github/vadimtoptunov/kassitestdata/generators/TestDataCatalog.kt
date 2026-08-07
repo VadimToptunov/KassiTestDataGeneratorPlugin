@@ -102,6 +102,14 @@ object TestDataCatalog {
             IdentifierGenerator.isbn13(Rng(seed), valid = true)
         }
 
+        // 5b'. Crypto addresses with real checksums (Base58Check / EIP-55).
+        items += CatalogItem("Crypto", "Bitcoin address (P2PKH, mainnet) · valid") { seed ->
+            CryptoAddressGenerator.btcAddress(Rng(seed), valid = true)
+        }
+        items += CatalogItem("Crypto", "Ethereum address (EIP-55) · valid") { seed ->
+            CryptoAddressGenerator.ethAddress(Rng(seed), valid = true)
+        }
+
         // 5d. Russia — business registration IDs (personal СНИЛС + ИНН are surfaced via the loops above).
         items += CatalogItem("Business", "ИНН (юр. лицо) · Russia") { seed ->
             RussianIdGenerator.innLegal(Rng(seed), valid = true)
