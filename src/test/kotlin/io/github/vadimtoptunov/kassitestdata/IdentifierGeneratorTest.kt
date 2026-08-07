@@ -31,6 +31,24 @@ class IdentifierGeneratorTest {
     }
 
     @Test
+    fun `VIN reference values (real check characters)`() {
+        assertTrue(Checksums.isValidVin("1M8GDM9AXKP042788")) // canonical NHTSA example, check char 'X'
+        assertTrue(Checksums.isValidVin("11111111111111111")) // all ones → check digit 1
+        assertFalse(Checksums.isValidVin("1M8GDM9A0KP042788")) // check char wrong (0 instead of X)
+        assertFalse(Checksums.isValidVin("1M8GDM9AXKP04278I")) // contains illegal 'I'
+    }
+
+    @Test
+    fun `ISBN-10 and ISBN-13 reference values`() {
+        assertTrue(Checksums.isValidIsbn10("0306406152")) // 0-306-40615-2
+        assertTrue(Checksums.isValidIsbn10("097522980X")) // 0-9752298-0-X (check char X)
+        assertTrue(Checksums.isValidIsbn10("0-306-40615-2")) // hyphens ignored
+        assertFalse(Checksums.isValidIsbn10("0306406153"))
+        assertTrue(isValidEan13("9780306406157")) // ISBN-13 978-0-306-40615-7
+        assertFalse(isValidEan13("9780306406158"))
+    }
+
+    @Test
     fun `generators round-trip - valid passes, invalid fails`() {
         val rng = Rng(2024L)
         repeat(100) {
@@ -40,6 +58,12 @@ class IdentifierGeneratorTest {
             assertFalse(Checksums.isLuhnValid(IdentifierGenerator.imei(rng, valid = false)))
             assertTrue(isValidEan13(IdentifierGenerator.ean13(rng, valid = true)))
             assertFalse(isValidEan13(IdentifierGenerator.ean13(rng, valid = false)))
+            assertTrue(Checksums.isValidVin(IdentifierGenerator.vin(rng, valid = true)))
+            assertFalse(Checksums.isValidVin(IdentifierGenerator.vin(rng, valid = false)))
+            assertTrue(Checksums.isValidIsbn10(IdentifierGenerator.isbn10(rng, valid = true)))
+            assertFalse(Checksums.isValidIsbn10(IdentifierGenerator.isbn10(rng, valid = false)))
+            assertTrue(isValidEan13(IdentifierGenerator.isbn13(rng, valid = true)))
+            assertFalse(isValidEan13(IdentifierGenerator.isbn13(rng, valid = false)))
         }
     }
 }

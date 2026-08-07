@@ -40,6 +40,10 @@
     ]]></description>
 
     <change-notes><![CDATA[
+    <h3>1.19.0</h3>
+    <ul>
+      <li>More identifiers with real check digits: <b>VIN</b> (vehicle, ISO 3779 — position-9 check character), <b>ISBN-10</b> (mod-11, incl. the 'X' check) and <b>ISBN-13</b> (978/979, EAN-13 check).</li>
+    </ul>
     <h3>1.18.0</h3>
     <ul>
       <li>Easier picking: <b>Insert Test Data</b> is now a two-level menu — choose a category (Persona, Bank account, Card, National ID, Passport, Phone…) and then the item (with search) — instead of one long flat list.</li>
