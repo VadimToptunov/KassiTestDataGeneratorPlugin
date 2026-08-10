@@ -59,4 +59,18 @@ object IdentifierGenerator {
         val check = EuIdChecksums.ean13Check(first12)
         return if (valid) "$first12$check" else "$first12${(check + 1) % 10}"
     }
+
+    /** ICCID (SIM card): 19 digits — telecom prefix 89 + serial + Luhn check. */
+    fun iccid(rng: Rng, valid: Boolean): String {
+        val body = "89" + rng.digits(16) // 18-digit body; ICCIDs are assigned under the 89 industry code
+        val check = Checksums.luhnCheckDigit(body)
+        return if (valid) "$body$check" else "$body${(check + 1) % 10}"
+    }
+
+    /** ISO 6346 shipping-container code: 3-letter owner + category U + 6-digit serial + check digit. */
+    fun containerCode(rng: Rng, valid: Boolean): String {
+        val body = rng.upperLetters(3) + "U" + rng.digits(6)
+        val check = Checksums.iso6346CheckDigit(body)
+        return if (valid) "$body$check" else "$body${(check + 1) % 10}"
+    }
 }

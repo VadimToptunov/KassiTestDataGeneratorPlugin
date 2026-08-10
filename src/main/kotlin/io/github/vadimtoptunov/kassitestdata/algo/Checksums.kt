@@ -329,4 +329,37 @@ object Checksums {
         val check = jmbgCheckDigit(value.substring(0, 12)) ?: return false
         return check == (value[12] - '0')
     }
+
+    // ---------------------------------------------------------------------
+    // ISO 6346 — shipping-container code: 4 letters + 6 digits + 1 check digit.
+    // ---------------------------------------------------------------------
+
+    // Letter values run A=10, B=12, … sequentially but skipping every multiple of 11 (11, 22, 33).
+    private fun iso6346Value(c: Char): Int {
+        var v = 10
+        for (ch in 'A' until c) {
+            v++
+            if (v % 11 == 0) v++
+        }
+        return v
+    }
+
+    /** ISO 6346 check digit for the first 10 chars (4 letters + 6 digits): Σ value·2^i mod 11, 10 → 0. */
+    fun iso6346CheckDigit(firstTen: String): Int {
+        var sum = 0
+        for (i in 0 until 10) {
+            val value = if (firstTen[i] in 'A'..'Z') iso6346Value(firstTen[i]) else (firstTen[i] - '0')
+            sum += value * (1 shl i)
+        }
+        return (sum % 11) % 10
+    }
+
+    /** Validate a full 11-char ISO 6346 container code (4 letters + 6 digits + check digit). */
+    fun isValidIso6346(code: String): Boolean {
+        val s = code.uppercase()
+        if (s.length != 11) return false
+        if (!s.substring(0, 4).all { it in 'A'..'Z' }) return false
+        if (!s.substring(4).all { it in '0'..'9' }) return false
+        return iso6346CheckDigit(s.substring(0, 10)) == (s[10] - '0')
+    }
 }

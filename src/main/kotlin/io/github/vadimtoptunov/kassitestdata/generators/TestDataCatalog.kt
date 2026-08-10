@@ -101,6 +101,12 @@ object TestDataCatalog {
         items += CatalogItem("Identifier", "ISBN-13 · Book · valid") { seed ->
             IdentifierGenerator.isbn13(Rng(seed), valid = true)
         }
+        items += CatalogItem("Identifier", "ICCID · SIM card (Luhn) · valid") { seed ->
+            IdentifierGenerator.iccid(Rng(seed), valid = true)
+        }
+        items += CatalogItem("Identifier", "Container code · ISO 6346 · valid") { seed ->
+            IdentifierGenerator.containerCode(Rng(seed), valid = true)
+        }
 
         // 5b'. Crypto addresses with real checksums (Base58Check / EIP-55).
         items += CatalogItem("Crypto", "Bitcoin address (P2PKH, mainnet) · valid") { seed ->

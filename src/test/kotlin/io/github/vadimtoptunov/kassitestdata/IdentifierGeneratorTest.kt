@@ -49,6 +49,13 @@ class IdentifierGeneratorTest {
     }
 
     @Test
+    fun `ISO 6346 container reference value`() {
+        assertTrue(Checksums.isValidIso6346("CSQU3054383")) // canonical ISO 6346 example, check digit 3
+        assertFalse(Checksums.isValidIso6346("CSQU3054384"))
+        assertFalse(Checksums.isValidIso6346("CSQU305438")) // too short
+    }
+
+    @Test
     fun `generators round-trip - valid passes, invalid fails`() {
         val rng = Rng(2024L)
         repeat(100) {
@@ -64,6 +71,10 @@ class IdentifierGeneratorTest {
             assertFalse(Checksums.isValidIsbn10(IdentifierGenerator.isbn10(rng, valid = false)))
             assertTrue(isValidEan13(IdentifierGenerator.isbn13(rng, valid = true)))
             assertFalse(isValidEan13(IdentifierGenerator.isbn13(rng, valid = false)))
+            assertTrue(Checksums.isLuhnValid(IdentifierGenerator.iccid(rng, valid = true)))
+            assertFalse(Checksums.isLuhnValid(IdentifierGenerator.iccid(rng, valid = false)))
+            assertTrue(Checksums.isValidIso6346(IdentifierGenerator.containerCode(rng, valid = true)))
+            assertFalse(Checksums.isValidIso6346(IdentifierGenerator.containerCode(rng, valid = false)))
         }
     }
 }
