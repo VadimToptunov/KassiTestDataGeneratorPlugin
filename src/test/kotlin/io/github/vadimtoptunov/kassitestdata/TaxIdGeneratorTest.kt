@@ -69,6 +69,28 @@ class TaxIdGeneratorTest {
     }
 
     @Test
+    fun `Nordic VAT reference values (python-stdnum documented examples)`() {
+        assertTrue(Checksums.isValidFinnishVat("20774740")) // FI, ALV
+        assertTrue(Checksums.isValidDanishVat("13585628")) // DK, CVR
+        assertTrue(Checksums.isValidNorwegianVat("988077917")) // NO, MVA/orgnr
+        assertFalse(Checksums.isValidFinnishVat("20774741"))
+        assertFalse(Checksums.isValidDanishVat("13585629"))
+        assertFalse(Checksums.isValidNorwegianVat("988077918"))
+    }
+
+    @Test
+    fun `Nordic VAT valid passes and invalid fails`() {
+        repeat(50) {
+            assertTrue(Checksums.isValidFinnishVat(TaxIdGenerator.finnishVat(rng, valid = true)))
+            assertFalse(Checksums.isValidFinnishVat(TaxIdGenerator.finnishVat(rng, valid = false)))
+            assertTrue(Checksums.isValidDanishVat(TaxIdGenerator.danishVat(rng, valid = true)))
+            assertFalse(Checksums.isValidDanishVat(TaxIdGenerator.danishVat(rng, valid = false)))
+            assertTrue(Checksums.isValidNorwegianVat(TaxIdGenerator.norwegianVat(rng, valid = true)))
+            assertFalse(Checksums.isValidNorwegianVat(TaxIdGenerator.norwegianVat(rng, valid = false)))
+        }
+    }
+
+    @Test
     fun `presented FR and ES VAT carry the prefix and a valid body`() {
         val fr = TaxIdGenerator.generate(io.github.vadimtoptunov.kassitestdata.core.Country.FR, rng)
         assertTrue(fr.startsWith("FR") && EuIdChecksums.isValidFrenchVat(fr.substring(2)), fr)

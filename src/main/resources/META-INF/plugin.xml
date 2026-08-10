@@ -40,6 +40,10 @@
     ]]></description>
 
     <change-notes><![CDATA[
+    <h3>1.23.0</h3>
+    <ul>
+      <li>Nordic VAT numbers with real check digits: <b>Finland</b> (ALV), <b>Denmark</b> (CVR) and <b>Norway</b> (MVA / organisasjonsnummer).</li>
+    </ul>
     <h3>1.22.0</h3>
     <ul>
       <li>More identifiers with real check digits: <b>ICCID</b> (SIM card, Luhn) and <b>ISO 6346</b> shipping-container codes (owner + serial + weighted mod-11 check).</li>

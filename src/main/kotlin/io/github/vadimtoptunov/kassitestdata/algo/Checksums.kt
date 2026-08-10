@@ -362,4 +362,66 @@ object Checksums {
         if (!s.substring(4).all { it in '0'..'9' }) return false
         return iso6346CheckDigit(s.substring(0, 10)) == (s[10] - '0')
     }
+
+    // ---------------------------------------------------------------------
+    // Nordic VAT — Finland (ALV), Denmark (CVR), Norway (MVA/orgnr), all weighted mod-11.
+    // ---------------------------------------------------------------------
+
+    private val FI_VAT_WEIGHTS = intArrayOf(7, 9, 10, 5, 8, 4, 2)
+
+    /** Finnish VAT check digit for the 7-digit base; null when the remainder is 1 (unassignable). */
+    fun finnishVatCheckDigit(sevenDigits: String): Int? {
+        var sum = 0
+        for (i in 0 until 7) sum += (sevenDigits[i] - '0') * FI_VAT_WEIGHTS[i]
+        return when (val r = sum % 11) {
+            0 -> 0
+            1 -> null
+            else -> 11 - r
+        }
+    }
+
+    /** Finnish VAT (ALV): 8 digits = 7-digit base + check digit. */
+    fun isValidFinnishVat(eightDigits: String): Boolean {
+        if (eightDigits.length != 8 || !eightDigits.all { it in '0'..'9' }) return false
+        val c = finnishVatCheckDigit(eightDigits.substring(0, 7)) ?: return false
+        return c == (eightDigits[7] - '0')
+    }
+
+    private val DK_CVR_WEIGHTS = intArrayOf(2, 7, 6, 5, 4, 3, 2, 1)
+
+    /** Danish CVR check digit (the 8th) for the first 7 digits; null when it would be 10 (unassignable). */
+    fun danishVatCheckDigit(sevenDigits: String): Int? {
+        var sum = 0
+        for (i in 0 until 7) sum += (sevenDigits[i] - '0') * DK_CVR_WEIGHTS[i]
+        val check = (11 - (sum % 11)) % 11
+        return if (check == 10) null else check
+    }
+
+    /** Danish VAT (CVR): 8 digits, weighted sum divisible by 11. */
+    fun isValidDanishVat(eightDigits: String): Boolean {
+        if (eightDigits.length != 8 || !eightDigits.all { it in '0'..'9' }) return false
+        var sum = 0
+        for (i in 0 until 8) sum += (eightDigits[i] - '0') * DK_CVR_WEIGHTS[i]
+        return sum % 11 == 0
+    }
+
+    private val NO_ORGNR_WEIGHTS = intArrayOf(3, 2, 7, 6, 5, 4, 3, 2)
+
+    /** Norwegian orgnr/MVA check digit for the 8-digit base; null when the remainder is 1 (unassignable). */
+    fun norwegianVatCheckDigit(eightDigits: String): Int? {
+        var sum = 0
+        for (i in 0 until 8) sum += (eightDigits[i] - '0') * NO_ORGNR_WEIGHTS[i]
+        return when (val r = sum % 11) {
+            0 -> 0
+            1 -> null
+            else -> 11 - r
+        }
+    }
+
+    /** Norwegian VAT (MVA): 9-digit organisasjonsnummer = 8-digit base + check digit. */
+    fun isValidNorwegianVat(nineDigits: String): Boolean {
+        if (nineDigits.length != 9 || !nineDigits.all { it in '0'..'9' }) return false
+        val c = norwegianVatCheckDigit(nineDigits.substring(0, 8)) ?: return false
+        return c == (nineDigits[8] - '0')
+    }
 }
