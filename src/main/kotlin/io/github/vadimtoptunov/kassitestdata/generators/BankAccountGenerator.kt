@@ -16,16 +16,23 @@ object BankAccountGenerator {
     fun iban(country: Country, rng: Rng, valid: Boolean): String {
         val spec = IbanRegistry.specFor(country)
             ?: throw IllegalArgumentException("${country.code} is not an IBAN country")
-        val bban = buildString {
-            for ((count, type) in spec.bbanSegments) {
-                append(
-                    when (type) {
-                        'n' -> rng.digits(count)
-                        'a' -> rng.upperLetters(count)
-                        'c' -> rng.alnums(count)
-                        else -> error("unreachable")
-                    }
-                )
+        val bban = if (country == Country.ES) {
+            // Spain has two national control digits inside the BBAN; make them valid, not just mod-97.
+            val bankBranch = rng.digits(8)
+            val account = rng.digits(10)
+            bankBranch + Checksums.spanishBbanControlDigits(bankBranch, account) + account
+        } else {
+            buildString {
+                for ((count, type) in spec.bbanSegments) {
+                    append(
+                        when (type) {
+                            'n' -> rng.digits(count)
+                            'a' -> rng.upperLetters(count)
+                            'c' -> rng.alnums(count)
+                            else -> error("unreachable")
+                        }
+                    )
+                }
             }
         }
         val check = Checksums.ibanCheckDigits(country.code, bban)

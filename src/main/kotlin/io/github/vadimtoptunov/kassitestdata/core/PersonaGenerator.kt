@@ -32,6 +32,7 @@ data class Persona(
     val taxLabel: String?,
     val taxId: String?,
     val phone: String?,
+    val email: String,
     val passportMrz: String,
     val seed: Long?,
 ) {
@@ -41,6 +42,7 @@ data class Persona(
         appendLine("Date of birth: $dateOfBirth")
         appendLine("Country:       ${country.displayName} (${country.code})")
         appendLine("Address:       $address")
+        appendLine("Email:${padTo("Email:")}$email")
         appendLine("$bankLabel${padTo(bankLabel)}$bankValue")
         appendLine("BIC:           $bic")
         if (nationalId != null) appendLine("$nationalIdLabel${padTo(nationalIdLabel!!)}$nationalId")
@@ -115,6 +117,9 @@ object PersonaGenerator {
 
         val phone = if (PhoneGenerator.isSupported(country)) PhoneGenerator.generate(country, rng, valid = true) else null
 
+        // Email coherent with the name (RFC 2606 reserved domain), e.g. anna.eriksson@example.com.
+        val email = coherentEmail(first, last, rng)
+
         // Passport MRZ (ICAO TD3), coherent with the persona's name, nationality, DOB and sex.
         val passportMrz = MrzGenerator.td3(
             country, rng, valid = true, birth = dob, gender = gender, surname = last, givenNames = first,
@@ -134,8 +139,19 @@ object PersonaGenerator {
             taxLabel = taxLabel,
             taxId = taxId,
             phone = phone,
+            email = email,
             passportMrz = passportMrz,
             seed = seed,
         )
+    }
+
+    /** An address-safe local part derived from the persona's name: strip diacritics, keep [a-z0-9]. */
+    private fun coherentEmail(first: String, last: String, rng: Rng): String {
+        fun slug(s: String): String = java.text.Normalizer.normalize(s, java.text.Normalizer.Form.NFD)
+            .replace(Regex("[^A-Za-z0-9]"), "").lowercase()
+        val f = slug(first)
+        val l = slug(last)
+        val local = if (f.isEmpty() || l.isEmpty()) "user${rng.digits(3)}" else "$f.$l"
+        return "$local@example.com"
     }
 }

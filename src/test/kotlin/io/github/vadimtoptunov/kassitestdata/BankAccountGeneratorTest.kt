@@ -1,5 +1,6 @@
 package io.github.vadimtoptunov.kassitestdata
 
+import io.github.vadimtoptunov.kassitestdata.algo.Checksums
 import io.github.vadimtoptunov.kassitestdata.core.Country
 import io.github.vadimtoptunov.kassitestdata.core.Rng
 import io.github.vadimtoptunov.kassitestdata.data.IbanRegistry
@@ -40,6 +41,19 @@ class BankAccountGeneratorTest {
                 assertEquals(spec.length, invalid.length, "${country.code} invalid IBAN length preserved")
                 assertFalse(referenceIbanValid(invalid), "${country.code} invalid IBAN should fail mod-97: $invalid")
             }
+        }
+    }
+
+    @Test
+    fun `Spanish IBAN carries valid national BBAN control digits`() {
+        // Published reference IBAN (ES91 2100 0418 45 0200051332) — control digits 4 and 5 are correct.
+        assertTrue(Checksums.isValidSpanishIbanBban("ES9121000418450200051332"))
+        assertFalse(Checksums.isValidSpanishIbanBban("ES9121000418440200051332")) // control "44" wrong
+        val rng = Rng(7L)
+        repeat(50) {
+            val iban = BankAccountGenerator.iban(Country.ES, rng, valid = true)
+            assertTrue(referenceIbanValid(iban), "ES IBAN mod-97: $iban")
+            assertTrue(Checksums.isValidSpanishIbanBban(iban), "ES IBAN national BBAN control: $iban")
         }
     }
 

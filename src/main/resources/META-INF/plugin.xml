@@ -40,6 +40,11 @@
     ]]></description>
 
     <change-notes><![CDATA[
+    <h3>1.24.0</h3>
+    <ul>
+      <li>Personas now include a <b>coherent email</b> derived from the name (on the reserved example.com domain).</li>
+      <li><b>Spanish IBANs</b> are now valid at the national level too — the two BBAN control digits (bank/branch + account) are correct, not just the IBAN mod-97 check.</li>
+    </ul>
     <h3>1.23.0</h3>
     <ul>
       <li>Nordic VAT numbers with real check digits: <b>Finland</b> (ALV), <b>Denmark</b> (CVR) and <b>Norway</b> (MVA / organisasjonsnummer).</li>

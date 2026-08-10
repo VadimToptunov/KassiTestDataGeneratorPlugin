@@ -42,6 +42,17 @@ class PersonaGeneratorTest {
     }
 
     @Test
+    fun `persona email is coherent with the name and uses the reserved domain`() {
+        for (country in Country.entries) {
+            val p = PersonaGenerator.generate(country, seed = 42L)
+            assertTrue(Regex("[a-z0-9.]+@example\\.com").matches(p.email), "${country.code}: ${p.email}")
+            val firstSlug = java.text.Normalizer.normalize(p.fullName.substringBefore(' '), java.text.Normalizer.Form.NFD)
+                .replace(Regex("[^A-Za-z0-9]"), "").lowercase()
+            if (firstSlug.isNotEmpty()) assertTrue(p.email.startsWith(firstSlug), "${p.email} vs $firstSlug")
+        }
+    }
+
+    @Test
     fun `Australian persona uses BSB, not IBAN`() {
         val p = PersonaGenerator.generate(Country.AU, seed = 1L)
         assertTrue(p.bankValue.startsWith("BSB "), p.bankValue)
