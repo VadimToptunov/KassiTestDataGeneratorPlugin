@@ -26,6 +26,9 @@ object TaxIdGenerator {
         Country.PT to Scheme("VAT (NIF)"),
         Country.FR to Scheme("VAT (TVA)"),
         Country.ES to Scheme("VAT (CIF)"),
+        Country.FI to Scheme("VAT (ALV)"),
+        Country.DK to Scheme("VAT (CVR)"),
+        Country.NO to Scheme("VAT (MVA)"),
         Country.RU to Scheme("ИНН"),
     )
 
@@ -42,6 +45,9 @@ object TaxIdGenerator {
         Country.PT -> "PT" + portugueseVat(rng, valid)
         Country.FR -> "FR" + frenchVat(rng, valid)
         Country.ES -> "ES" + spanishCif(rng, valid)
+        Country.FI -> "FI" + finnishVat(rng, valid)
+        Country.DK -> "DK" + danishVat(rng, valid)
+        Country.NO -> "NO" + norwegianVat(rng, valid)
         Country.RU -> RussianIdGenerator.innIndividual(rng, valid) // ИНН has no country prefix
         else -> throw IllegalArgumentException("No tax scheme for ${country.code} in v1")
     }
@@ -95,6 +101,33 @@ object TaxIdGenerator {
         // Corrupt the key so it no longer matches the SIREN (the SIREN stays Luhn-valid).
         val wrongKey = (key + 1) % 97
         return wrongKey.toString().padStart(2, '0') + siren
+    }
+
+    // --- FI VAT (ALV): 8 digits — 7-digit base + weighted mod-11 check ---
+    fun finnishVat(rng: Rng, valid: Boolean): String {
+        while (true) {
+            val base = rng.digitsNonZeroLead(7)
+            val check = Checksums.finnishVatCheckDigit(base) ?: continue
+            return if (valid) "$base$check" else "$base${(check + 1) % 10}"
+        }
+    }
+
+    // --- DK VAT (CVR): 8 digits, weighted sum divisible by 11 ---
+    fun danishVat(rng: Rng, valid: Boolean): String {
+        while (true) {
+            val base = rng.digitsNonZeroLead(7)
+            val check = Checksums.danishVatCheckDigit(base) ?: continue
+            return if (valid) "$base$check" else "$base${(check + 1) % 10}"
+        }
+    }
+
+    // --- NO VAT (MVA): 9-digit organisasjonsnummer — 8-digit base + weighted mod-11 check ---
+    fun norwegianVat(rng: Rng, valid: Boolean): String {
+        while (true) {
+            val base = rng.digitsNonZeroLead(8)
+            val check = Checksums.norwegianVatCheckDigit(base) ?: continue
+            return if (valid) "$base$check" else "$base${(check + 1) % 10}"
+        }
     }
 
     // --- ES CIF (type A, Sociedad Anónima): 'A' + 7 digits + digit control ---
