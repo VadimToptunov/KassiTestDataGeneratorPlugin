@@ -42,3 +42,6 @@ bin/
 .DS_Store
 ### IDE local files
 .idea/workspace.xml
+
+### Private strategy docs — must never be committed to this PUBLIC repo
+IDE_PLUGIN_IDEAS.md
