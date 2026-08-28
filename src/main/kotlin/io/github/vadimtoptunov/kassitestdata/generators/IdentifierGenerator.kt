@@ -19,6 +19,13 @@ object IdentifierGenerator {
         return if (valid) "$body$check" else "$body${(check + 1) % 10}"
     }
 
+    /** CUSIP (North-American security): 8-char alphanumeric base + "double add double" check digit. */
+    fun cusip(rng: Rng, valid: Boolean): String {
+        val base = rng.alnums(8)
+        val check = Checksums.cusipCheckDigit(base)
+        return if (valid) "$base$check" else "$base${(check + 1) % 10}"
+    }
+
     /** IMEI: 15 digits — 14-digit body (TAC + serial) + Luhn check. */
     fun imei(rng: Rng, valid: Boolean): String {
         val first14 = rng.digitsNonZeroLead(14)

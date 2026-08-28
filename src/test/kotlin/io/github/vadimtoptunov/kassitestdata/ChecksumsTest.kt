@@ -68,6 +68,17 @@ class ChecksumsTest {
     }
 
     @Test
+    fun `CUSIP check digit reference (real securities)`() {
+        // Published CUSIPs from Wikipedia's worked list (https://en.wikipedia.org/wiki/CUSIP):
+        // Apple Inc. 037833100, Microsoft Corporation 594918104, Cisco Systems 17275R102 (letter in base).
+        assertEquals(0, Checksums.cusipCheckDigit("03783310")) // Apple → 037833100
+        assertTrue(Checksums.isValidCusip("037833100"))
+        assertTrue(Checksums.isValidCusip("594918104")) // Microsoft
+        assertTrue(Checksums.isValidCusip("17275R102")) // Cisco — 'R' in the base
+        assertFalse(Checksums.isValidCusip("037833101")) // check digit off by one
+    }
+
+    @Test
     fun `ICAO 7-3-1 check digit reference`() {
         // Classic ICAO 9303 passport-number example: "L898902C" → check digit 3.
         assertEquals(3, Checksums.icao731CheckDigit("L898902C"))
