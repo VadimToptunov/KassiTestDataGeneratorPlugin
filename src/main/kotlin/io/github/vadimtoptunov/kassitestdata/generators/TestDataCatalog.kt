@@ -86,6 +86,9 @@ object TestDataCatalog {
         items += CatalogItem("Identifier", "ISIN · Security (ISO 6166) · valid") { seed ->
             IdentifierGenerator.isin(Rng(seed), valid = true)
         }
+        items += CatalogItem("Identifier", "CUSIP · Security (North America) · valid") { seed ->
+            IdentifierGenerator.cusip(Rng(seed), valid = true)
+        }
         items += CatalogItem("Identifier", "IMEI · Device · valid") { seed ->
             IdentifierGenerator.imei(Rng(seed), valid = true)
         }

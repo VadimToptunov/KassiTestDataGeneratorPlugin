@@ -107,6 +107,38 @@ object Checksums {
     }
 
     // ---------------------------------------------------------------------
+    // CUSIP — North-American securities identifier (9 chars: 8-char base + check digit).
+    // "Modulus 10 Double Add Double" over the base; US ISINs embed a CUSIP.
+    // ---------------------------------------------------------------------
+
+    /** CUSIP character value: digit → itself, A→10 … Z→35, and the reserved '*'=36, '@'=37, '#'=38. */
+    private fun cusipValue(c: Char): Int = when {
+        c in '0'..'9' -> c - '0'
+        c in 'A'..'Z' -> c - 'A' + 10
+        c == '*' -> 36
+        c == '@' -> 37
+        c == '#' -> 38
+        else -> throw IllegalArgumentException("Illegal CUSIP char '$c'")
+    }
+
+    /** CUSIP check digit for the 8-char base: even (1-based) positions doubled, digit-summed, mod 10. */
+    fun cusipCheckDigit(first8: String): Int {
+        var sum = 0
+        for (i in 0 until 8) {
+            var v = cusipValue(first8[i])
+            if (i % 2 == 1) v *= 2 // 1-based even positions (2,4,6,8) are doubled
+            sum += v / 10 + v % 10
+        }
+        return (10 - (sum % 10)) % 10
+    }
+
+    fun isValidCusip(value: String): Boolean {
+        val s = value.uppercase()
+        if (!Regex("^[0-9A-Z*@#]{8}[0-9]$").matches(s)) return false
+        return cusipCheckDigit(s.substring(0, 8)) == (s[8] - '0')
+    }
+
+    // ---------------------------------------------------------------------
     // Dutch 11-proef — BSN (national ID) and legacy BTW/RSIN (tax).
     // ---------------------------------------------------------------------
 
