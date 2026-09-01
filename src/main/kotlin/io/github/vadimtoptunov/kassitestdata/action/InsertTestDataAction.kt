@@ -6,7 +6,7 @@ import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys
 import com.intellij.openapi.command.WriteCommandAction
 import com.intellij.openapi.editor.Editor
-import com.intellij.openapi.editor.EditorModificationUtil
+import com.intellij.openapi.editor.EditorModificationUtilEx
 import com.intellij.openapi.ui.popup.JBPopupFactory
 import com.intellij.openapi.ui.popup.PopupStep
 import com.intellij.openapi.ui.popup.util.BaseListPopupStep
@@ -34,7 +34,7 @@ class InsertTestDataAction : AnAction() {
         val insert: (CatalogItem) -> Unit = { item ->
             val text = item.produce(KassiSettings.getInstance().seedOrNull())
             WriteCommandAction.runWriteCommandAction(project) {
-                EditorModificationUtil.insertStringAtCaret(editor, text)
+                EditorModificationUtilEx.insertStringAtCaret(editor, text)
             }
         }
 
