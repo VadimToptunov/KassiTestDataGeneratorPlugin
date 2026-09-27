@@ -89,6 +89,9 @@ object TestDataCatalog {
         items += CatalogItem("Identifier", "CUSIP · Security (North America) · valid") { seed ->
             IdentifierGenerator.cusip(Rng(seed), valid = true)
         }
+        items += CatalogItem("Identifier", "SEDOL · Security (UK/Ireland) · valid") { seed ->
+            IdentifierGenerator.sedol(Rng(seed), valid = true)
+        }
         items += CatalogItem("Identifier", "IMEI · Device · valid") { seed ->
             IdentifierGenerator.imei(Rng(seed), valid = true)
         }

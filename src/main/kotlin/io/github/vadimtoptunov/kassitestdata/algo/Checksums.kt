@@ -139,6 +139,34 @@ object Checksums {
     }
 
     // ---------------------------------------------------------------------
+    // SEDOL — London Stock Exchange securities identifier (7 chars: 6-char base + check digit).
+    // Weighted sum (weights 1,3,1,7,3,9) over the base; mod-10 complement check. Vowels are
+    // never used, so a SEDOL base is digits plus consonants only.
+    // ---------------------------------------------------------------------
+
+    private val SEDOL_WEIGHTS = intArrayOf(1, 3, 1, 7, 3, 9)
+
+    /** SEDOL character value: digit → itself, B→11 … Z→35 (base-36; vowels A,E,I,O,U are excluded). */
+    private fun sedolValue(c: Char): Int = when {
+        c in '0'..'9' -> c - '0'
+        c in 'A'..'Z' && c !in "AEIOU" -> c - 'A' + 10
+        else -> throw IllegalArgumentException("Illegal SEDOL char '$c'")
+    }
+
+    /** SEDOL check digit for the 6-char base: weighted sum, then (10 - sum % 10) % 10. */
+    fun sedolCheckDigit(first6: String): Int {
+        var sum = 0
+        for (i in 0 until 6) sum += sedolValue(first6[i]) * SEDOL_WEIGHTS[i]
+        return (10 - (sum % 10)) % 10
+    }
+
+    fun isValidSedol(value: String): Boolean {
+        val s = value.uppercase()
+        if (!Regex("^[0-9B-DF-HJ-NP-TV-Z]{6}[0-9]$").matches(s)) return false
+        return sedolCheckDigit(s.substring(0, 6)) == (s[6] - '0')
+    }
+
+    // ---------------------------------------------------------------------
     // Dutch 11-proef — BSN (national ID) and legacy BTW/RSIN (tax).
     // ---------------------------------------------------------------------
 

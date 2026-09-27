@@ -49,6 +49,10 @@
     ]]></description>
 
     <change-notes><![CDATA[
+    <h3>1.28.0</h3>
+    <ul>
+      <li>More identifiers with real check digits: <b>SEDOL</b> — the London Stock Exchange securities identifier (6-char base of digits and consonants + weighted mod-10 check digit), joining ISIN and CUSIP. Valid + invalid variants.</li>
+    </ul>
     <h3>1.27.0</h3>
     <ul>
       <li><b>Clearer listing:</b> value-first summary, an honest comparison with generic faker tools, and links to the rest of the Kassi QA toolkit. No functional changes.</li>

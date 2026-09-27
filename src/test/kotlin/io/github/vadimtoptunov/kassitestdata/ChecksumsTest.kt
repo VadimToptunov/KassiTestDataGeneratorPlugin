@@ -79,6 +79,18 @@ class ChecksumsTest {
     }
 
     @Test
+    fun `SEDOL check digit reference (published examples)`() {
+        // External worked examples from Wikipedia (https://en.wikipedia.org/wiki/SEDOL):
+        // B0YBKJ7 (base B0YBKJ, weighted sum 353 → 7) and the numeric 0263494 and 0540528.
+        assertEquals(7, Checksums.sedolCheckDigit("B0YBKJ"))
+        assertTrue(Checksums.isValidSedol("B0YBKJ7"))
+        assertTrue(Checksums.isValidSedol("0263494"))
+        assertTrue(Checksums.isValidSedol("0540528"))
+        assertFalse(Checksums.isValidSedol("B0YBKJ8")) // check digit off by one
+        assertFalse(Checksums.isValidSedol("A0YBKJ7")) // vowel 'A' is not a legal SEDOL character
+    }
+
+    @Test
     fun `ICAO 7-3-1 check digit reference`() {
         // Classic ICAO 9303 passport-number example: "L898902C" → check digit 3.
         assertEquals(3, Checksums.icao731CheckDigit("L898902C"))
