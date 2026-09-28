@@ -4,18 +4,10 @@
     <vendor email="vtoptunov88@gmail.com" url="https://github.com/VadimToptunov/KassiTestDataGeneratorPlugin">Vadim Toptunov</vendor>
 
     <description><![CDATA[
-    <h2>Kassi Test Data — valid banking &amp; KYC test data, generated offline</h2>
-    <p>
-    Generate valid <b>IBAN</b>s, <b>test credit-card (PAN)</b> numbers, <b>BIC / SWIFT</b> codes,
-    <b>VAT</b> numbers, <b>national IDs</b> and coherent <b>personas</b> — right in your IDE, fully offline.
-    A focused test-data generator for QA and fintech, not a generic faker.
-    </p>
-    <p>
-    Generic faker tools produce <em>plausible-looking</em> data. This plugin produces
-    <b>spec-valid</b> data that actually passes a real validator — plus the deliberately
-    <b>invalid</b> variant you need to test rejection paths. Built for QA and mobile/fintech
-    engineers working on banking and KYC flows.
-    </p>
+    <p><b>Spec-valid test data for fintech &amp; KYC:</b> IBAN (mod-97), test-BIN card numbers (Luhn),
+    passport MRZ, VAT and national IDs with real check digits — plus the deliberately <b>invalid</b>
+    variants your rejection tests need. Right in your IDE, 100% offline. A focused generator for QA
+    and fintech engineers, not a generic faker.</p>
     <ul>
       <li><b>IBAN</b> for the whole ISO 13616 registry — every European country plus 40+ worldwide (Türkiye, Saudi Arabia, UAE, Israel, Brazil, Pakistan, Egypt and more): correct national length and a passing ISO 7064 mod-97 check, with an invalid-checksum variant.</li>
       <li><b>Card (PAN)</b> — Luhn-valid, from payment-gateway <i>test</i> BIN ranges only (never real issuable cards), with CVV and expiry, plus a Luhn-invalid variant.</li>
@@ -30,6 +22,16 @@
     synthetic data for testing, not real identities. Every generator is covered by a unit test
     that asserts the valid output passes the real algorithm and the invalid variant fails it.
     </p>
+    <h3>How is this different from Test Data / Randomness / faker plugins?</h3>
+    <table>
+      <tr><th></th><th>Generic fakers</th><th>Kassi Test Data</th></tr>
+      <tr><td>IBAN</td><td>looks German</td><td>passes ISO 7064 mod-97 (+ national check digits where they exist)</td></tr>
+      <tr><td>Card (PAN)</td><td>random digits</td><td>Luhn-valid, published test BINs only</td></tr>
+      <tr><td>National / tax IDs</td><td>format only</td><td>real per-scheme checksum (BSN, Codice Fiscale, ИНН…)</td></tr>
+      <tr><td>Invalid variants for rejection tests</td><td>—</td><td>every generator, one precisely broken check</td></tr>
+      <tr><td>Coherent persona (one person, one country)</td><td>—</td><td>yes, seedable</td></tr>
+    </table>
+    <p>For random UUIDs, lorem ipsum and generic names those plugins are great — use both.</p>
     <p>
     <b>Free — and staying free.</b> The generators in this plugin are free and will remain free; nothing
     here becomes paywalled. An optional extended fintech pack may arrive later as a separate paid add-on,
@@ -37,9 +39,20 @@
     </p>
     <p><b>Usage:</b> right-click in the editor (or Tools ▸ Insert Test Data), search, pick, and it inserts at the caret.</p>
     <p><b>Source, issues &amp; docs:</b> <a href="https://github.com/VadimToptunov/KassiTestDataGeneratorPlugin">github.com/VadimToptunov/KassiTestDataGeneratorPlugin</a></p>
+    <p><i>Part of the Kassi QA toolkit:</i>
+    <a href="https://plugins.jetbrains.com/plugin/33849">Flaky Test Linter</a> ·
+    <a href="https://plugins.jetbrains.com/plugin/33967">HTTP Data Injector</a> ·
+    <a href="https://plugins.jetbrains.com/plugin/33227">Checksum &amp; Regex Playground</a> ·
+    <a href="https://plugins.jetbrains.com/plugin/33488">UUID, ULID &amp; NanoID Toolkit</a> ·
+    <a href="https://plugins.jetbrains.com/plugin/33325">MRZ &amp; Barcode Inspector</a> ·
+    <a href="https://plugins.jetbrains.com/plugin/34133">Secret &amp; Card Leak Guard</a></p>
     ]]></description>
 
     <change-notes><![CDATA[
+    <h3>1.27.0</h3>
+    <ul>
+      <li><b>Clearer listing:</b> value-first summary, an honest comparison with generic faker tools, and links to the rest of the Kassi QA toolkit. No functional changes.</li>
+    </ul>
     <h3>1.26.0</h3>
     <ul>
       <li>Compatibility: insert-at-caret now uses the current editor API (<code>EditorModificationUtilEx</code>), replacing an API scheduled for removal on newer IDE platforms. No behavior change.</li>
