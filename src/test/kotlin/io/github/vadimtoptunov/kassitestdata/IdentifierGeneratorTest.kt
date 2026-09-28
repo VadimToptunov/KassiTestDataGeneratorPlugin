@@ -63,6 +63,8 @@ class IdentifierGeneratorTest {
             assertFalse(Checksums.isValidIsin(IdentifierGenerator.isin(rng, valid = false)))
             assertTrue(Checksums.isValidCusip(IdentifierGenerator.cusip(rng, valid = true)))
             assertFalse(Checksums.isValidCusip(IdentifierGenerator.cusip(rng, valid = false)))
+            assertTrue(Checksums.isValidSedol(IdentifierGenerator.sedol(rng, valid = true)))
+            assertFalse(Checksums.isValidSedol(IdentifierGenerator.sedol(rng, valid = false)))
             assertTrue(Checksums.isLuhnValid(IdentifierGenerator.imei(rng, valid = true)))
             assertFalse(Checksums.isLuhnValid(IdentifierGenerator.imei(rng, valid = false)))
             assertTrue(isValidEan13(IdentifierGenerator.ean13(rng, valid = true)))

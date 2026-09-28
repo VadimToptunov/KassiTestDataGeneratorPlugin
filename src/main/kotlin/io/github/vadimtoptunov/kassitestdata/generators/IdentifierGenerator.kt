@@ -26,6 +26,16 @@ object IdentifierGenerator {
         return if (valid) "$base$check" else "$base${(check + 1) % 10}"
     }
 
+    // SEDOL base characters: digits plus consonants only (vowels A,E,I,O,U are never used).
+    private const val SEDOL_CHARS = "0123456789BCDFGHJKLMNPQRSTVWXYZ"
+
+    /** SEDOL (London Stock Exchange security): 6-char base (digits/consonants) + weighted mod-10 check. */
+    fun sedol(rng: Rng, valid: Boolean): String {
+        val base = String(CharArray(6) { SEDOL_CHARS[rng.int(SEDOL_CHARS.length)] })
+        val check = Checksums.sedolCheckDigit(base)
+        return if (valid) "$base$check" else "$base${(check + 1) % 10}"
+    }
+
     /** IMEI: 15 digits — 14-digit body (TAC + serial) + Luhn check. */
     fun imei(rng: Rng, valid: Boolean): String {
         val first14 = rng.digitsNonZeroLead(14)
