@@ -60,6 +60,15 @@ object BankAccountGenerator {
         return "Sort code $sortFormatted · Account $account"
     }
 
+    /** US ABA routing transit number (9 digits). [valid] = correct weighted mod-10 check digit. */
+    fun usRoutingNumber(rng: Rng, valid: Boolean): String {
+        // First two digits are the Federal Reserve district (01..12), keeping it in a realistic range.
+        val district = (rng.int(12) + 1).toString().padStart(2, '0')
+        val first8 = district + rng.digits(6)
+        val check = Checksums.abaRoutingCheckDigit(first8)
+        return if (valid) "$first8$check" else "$first8${(check + 1) % 10}"
+    }
+
     /** Australian domestic identifier: BSB (bbb-bbb) + account number. */
     fun auBsbAndAccount(rng: Rng): String {
         val bsb = rng.digits(6)
