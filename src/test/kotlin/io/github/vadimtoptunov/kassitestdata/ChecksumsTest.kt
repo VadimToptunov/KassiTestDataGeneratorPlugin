@@ -91,6 +91,18 @@ class ChecksumsTest {
     }
 
     @Test
+    fun `ABA routing check digit reference (real Federal Reserve routing numbers)`() {
+        // External anchor: real, publicly published U.S. routing transit numbers, all known-valid —
+        // JPMorgan Chase, FRB Boston, Wells Fargo, Bank of America (VA), Citibank (NY).
+        for (routing in listOf("021000021", "011000015", "121000248", "051000017", "021000089")) {
+            assertTrue(Checksums.isValidAbaRouting(routing), "$routing should be valid")
+            assertEquals(routing[8] - '0', Checksums.abaRoutingCheckDigit(routing.substring(0, 8)))
+        }
+        assertFalse(Checksums.isValidAbaRouting("021000022")) // check digit off by one
+        assertFalse(Checksums.isValidAbaRouting("12345678"))  // too short
+    }
+
+    @Test
     fun `ICAO 7-3-1 check digit reference`() {
         // Classic ICAO 9303 passport-number example: "L898902C" → check digit 3.
         assertEquals(3, Checksums.icao731CheckDigit("L898902C"))

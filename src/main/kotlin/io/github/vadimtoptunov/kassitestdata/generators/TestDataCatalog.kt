@@ -40,6 +40,12 @@ object TestDataCatalog {
         items += CatalogItem("Bank account", "BSB + Account (AU) · Australia") { seed ->
             BankAccountGenerator.auBsbAndAccount(Rng(seed))
         }
+        items += CatalogItem("Bank account", "Routing number (ABA) · United States · valid") { seed ->
+            BankAccountGenerator.usRoutingNumber(Rng(seed), valid = true)
+        }
+        items += CatalogItem("Bank account", "Routing number (ABA) · United States · invalid") { seed ->
+            BankAccountGenerator.usRoutingNumber(Rng(seed), valid = false)
+        }
 
         // 2. Card — per network, valid + invalid.
         for (network in CardGenerator.Network.entries) {

@@ -49,6 +49,10 @@
     ]]></description>
 
     <change-notes><![CDATA[
+    <h3>1.29.0</h3>
+    <ul>
+      <li>New bank identifier: <b>US routing number (ABA)</b> — a 9-digit routing transit number with a correct weighted mod-10 check digit (the same check real Federal Reserve routing numbers pass), with an invalid variant for negative tests.</li>
+    </ul>
     <h3>1.28.0</h3>
     <ul>
       <li>More identifiers with real check digits: <b>SEDOL</b> — the London Stock Exchange securities identifier (6-char base of digits and consonants + weighted mod-10 check digit), joining ISIN and CUSIP. Valid + invalid variants.</li>

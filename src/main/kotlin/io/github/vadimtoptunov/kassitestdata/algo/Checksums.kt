@@ -167,6 +167,27 @@ object Checksums {
     }
 
     // ---------------------------------------------------------------------
+    // ABA routing transit number — US bank identifier (9 digits, weighted mod-10).
+    // Weights 3,7,1 repeating; the total (including the 9th check digit) is divisible by 10.
+    // ---------------------------------------------------------------------
+
+    private val ABA_WEIGHTS = intArrayOf(3, 7, 1, 3, 7, 1, 3, 7, 1)
+
+    /** ABA check digit (9th) for an 8-digit routing prefix: (10 - weightedSum mod 10) mod 10. */
+    fun abaRoutingCheckDigit(first8: String): Int {
+        var sum = 0
+        for (i in 0 until 8) sum += (first8[i] - '0') * ABA_WEIGHTS[i]
+        return (10 - (sum % 10)) % 10
+    }
+
+    fun isValidAbaRouting(value: String): Boolean {
+        if (!Regex("^[0-9]{9}$").matches(value)) return false
+        var sum = 0
+        for (i in 0 until 9) sum += (value[i] - '0') * ABA_WEIGHTS[i]
+        return sum % 10 == 0
+    }
+
+    // ---------------------------------------------------------------------
     // Dutch 11-proef — BSN (national ID) and legacy BTW/RSIN (tax).
     // ---------------------------------------------------------------------
 

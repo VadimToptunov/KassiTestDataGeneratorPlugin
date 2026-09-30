@@ -76,6 +76,15 @@ class BankAccountGeneratorTest {
     }
 
     @Test
+    fun `US ABA routing numbers round-trip - valid pass, invalid fail`() {
+        val rng = Rng(99L)
+        repeat(100) {
+            assertTrue(Checksums.isValidAbaRouting(BankAccountGenerator.usRoutingNumber(rng, valid = true)))
+            assertFalse(Checksums.isValidAbaRouting(BankAccountGenerator.usRoutingNumber(rng, valid = false)))
+        }
+    }
+
+    @Test
     fun `Australia has no IBAN spec (forces the abstraction)`() {
         assertFalse(IbanRegistry.supportedCountries.contains(Country.AU))
     }
