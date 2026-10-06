@@ -103,6 +103,16 @@ class ChecksumsTest {
     }
 
     @Test
+    fun `ISSN check digit reference (published serials)`() {
+        // External anchor: real published ISSNs — Nature (0028-0836) and the Wikipedia worked
+        // example (0317-8471, check digit 1).
+        assertTrue(Checksums.isValidIssn("0028-0836"))
+        assertTrue(Checksums.isValidIssn("0317-8471"))
+        assertEquals('1', Checksums.issnCheckChar("0317847"))
+        assertFalse(Checksums.isValidIssn("0028-0837")) // check digit off by one
+    }
+
+    @Test
     fun `ICAO 7-3-1 check digit reference`() {
         // Classic ICAO 9303 passport-number example: "L898902C" → check digit 3.
         assertEquals(3, Checksums.icao731CheckDigit("L898902C"))

@@ -8,7 +8,7 @@ plugins {
 
 group = "io.github.vadimtoptunov"
 // Overridable by CI at release time: ./gradlew publishPlugin -PpluginVersion=1.25.0
-version = (findProperty("pluginVersion") as String?) ?: "1.29.0"
+version = (findProperty("pluginVersion") as String?) ?: "1.30.0"
 
 repositories {
     mavenCentral()

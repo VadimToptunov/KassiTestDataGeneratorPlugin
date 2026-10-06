@@ -70,6 +70,14 @@ object IdentifierGenerator {
         return "$body${if (check == '0') '1' else '0'}" // a wrong check character
     }
 
+    /** ISSN (ISO 3297): 7 digits + mod-11 check character (may be 'X'), formatted NNNN-NNNC. */
+    fun issn(rng: Rng, valid: Boolean): String {
+        val body = rng.digitsNonZeroLead(7)
+        val check = Checksums.issnCheckChar(body)
+        val c = if (valid) check else if (check == '0') '1' else '0' // a wrong check character
+        return "${body.substring(0, 4)}-${body.substring(4, 7)}$c"
+    }
+
     /** ISBN-13: a 978/979 prefix + 9 digits + EAN-13 check digit. */
     fun isbn13(rng: Rng, valid: Boolean): String {
         val first12 = (if (rng.boolean()) "978" else "979") + rng.digits(9)

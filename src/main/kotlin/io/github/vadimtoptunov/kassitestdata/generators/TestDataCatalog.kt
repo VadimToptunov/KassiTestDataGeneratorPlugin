@@ -113,6 +113,9 @@ object TestDataCatalog {
         items += CatalogItem("Identifier", "ISBN-13 · Book · valid") { seed ->
             IdentifierGenerator.isbn13(Rng(seed), valid = true)
         }
+        items += CatalogItem("Identifier", "ISSN · Serial publication (ISO 3297) · valid") { seed ->
+            IdentifierGenerator.issn(Rng(seed), valid = true)
+        }
         items += CatalogItem("Identifier", "ICCID · SIM card (Luhn) · valid") { seed ->
             IdentifierGenerator.iccid(Rng(seed), valid = true)
         }
