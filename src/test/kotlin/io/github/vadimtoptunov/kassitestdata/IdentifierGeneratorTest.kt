@@ -73,6 +73,8 @@ class IdentifierGeneratorTest {
             assertFalse(Checksums.isValidVin(IdentifierGenerator.vin(rng, valid = false)))
             assertTrue(Checksums.isValidIsbn10(IdentifierGenerator.isbn10(rng, valid = true)))
             assertFalse(Checksums.isValidIsbn10(IdentifierGenerator.isbn10(rng, valid = false)))
+            assertTrue(Checksums.isValidIssn(IdentifierGenerator.issn(rng, valid = true)))
+            assertFalse(Checksums.isValidIssn(IdentifierGenerator.issn(rng, valid = false)))
             assertTrue(isValidEan13(IdentifierGenerator.isbn13(rng, valid = true)))
             assertFalse(isValidEan13(IdentifierGenerator.isbn13(rng, valid = false)))
             assertTrue(Checksums.isLuhnValid(IdentifierGenerator.iccid(rng, valid = true)))
