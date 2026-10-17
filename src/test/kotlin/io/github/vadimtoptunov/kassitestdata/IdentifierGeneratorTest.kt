@@ -85,6 +85,8 @@ class IdentifierGeneratorTest {
             assertFalse(Checksums.isValidNpi(IdentifierGenerator.npi(rng, valid = false)))
             assertTrue(Checksums.isValidNhs(IdentifierGenerator.nhs(rng, valid = true).replace(" ", "")))
             assertFalse(Checksums.isValidNhs(IdentifierGenerator.nhs(rng, valid = false).replace(" ", "")))
+            assertTrue(Checksums.isValidCas(IdentifierGenerator.cas(rng, valid = true)))
+            assertFalse(Checksums.isValidCas(IdentifierGenerator.cas(rng, valid = false)))
         }
     }
 }

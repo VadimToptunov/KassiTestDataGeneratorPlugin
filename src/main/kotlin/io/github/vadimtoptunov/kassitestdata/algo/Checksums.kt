@@ -126,6 +126,23 @@ object Checksums {
         return check >= 0 && check == nhs[9] - '0'
     }
 
+    // CAS Registry Number: the check digit is (sum of each digit × its position from the right,
+    // counting the check position as 0) mod 10. Here [body] excludes the check digit.
+
+    /** CAS check digit for the digit-only body (everything before the final check digit). */
+    fun casCheckDigit(body: String): Int {
+        var sum = 0
+        for (i in body.indices) sum += (body[i] - '0') * (body.length - i)
+        return sum % 10
+    }
+
+    /** Validate a CAS Registry Number formatted NNNNNNN-NN-C (2–7 + 2 + 1 digits). */
+    fun isValidCas(cas: String): Boolean {
+        val m = Regex("^(\\d{2,7})-(\\d{2})-(\\d)$").matchEntire(cas) ?: return false
+        val body = m.groupValues[1] + m.groupValues[2]
+        return casCheckDigit(body) == m.groupValues[3].toInt()
+    }
+
     /** ISIN (ISO 6166) check digit: letters expand to two digits (A=10..Z=35), then Luhn over the string. */
     fun isinCheckDigit(first11: String): Int = luhnCheckDigit(expandIsin(first11))
 

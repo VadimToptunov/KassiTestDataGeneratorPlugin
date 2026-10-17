@@ -113,6 +113,16 @@ class ChecksumsTest {
     }
 
     @Test
+    fun `CAS Registry Number reference (published substances)`() {
+        // External anchor: the check-digit worked example from the CAS registry documentation —
+        // water 7732-18-5 (sum 105 → 5) and caffeine 58-08-2.
+        assertEquals(5, Checksums.casCheckDigit("773218"))
+        assertTrue(Checksums.isValidCas("7732-18-5"))
+        assertTrue(Checksums.isValidCas("58-08-2"))   // caffeine
+        assertFalse(Checksums.isValidCas("7732-18-4")) // check digit off by one
+    }
+
+    @Test
     fun `NHS number check digit reference (published example)`() {
         // External anchor: 9434765919 is the valid NHS-number example published in the NHS Data
         // Model and Dictionary / developer docs (weights 10..2, check = 11 - sum mod 11).
