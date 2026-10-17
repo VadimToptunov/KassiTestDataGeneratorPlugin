@@ -46,6 +46,10 @@
     ]]></description>
 
     <change-notes><![CDATA[
+    <h3>1.32.0</h3>
+    <ul>
+      <li>New identifier with a real check digit: <b>NHS number</b> (United Kingdom) — a 10-digit patient number with a correct weighted mod-11 check digit (the same check real NHS numbers pass), formatted <code>NNN NNN NNNN</code>, with an invalid variant for negative tests.</li>
+    </ul>
     <h3>1.31.0</h3>
     <ul>
       <li>New identifier with a real check digit: <b>NPI</b> — the US National Provider Identifier (10 digits; Luhn check computed over the mandated <code>80840</code> prefix, the same check real NPIs pass), with an invalid variant for negative tests.</li>

@@ -104,6 +104,28 @@ object Checksums {
     fun isValidNpi(npi: String): Boolean =
         npi.length == 10 && npi.all { it in '0'..'9' } && isLuhnValid(NPI_PREFIX + npi)
 
+    // NHS number (England/Wales/IoM): 10 digits; digits 1..9 weighted 10..2, check = 11 - (sum mod 11).
+    // A computed check of 11 maps to 0; a computed check of 10 means the number is invalid (never issued).
+
+    /** NHS check digit for the 9-digit body, or -1 if the body yields an invalid (10) check. */
+    fun nhsCheckDigit(body9: String): Int {
+        var sum = 0
+        for (i in 0 until 9) sum += (body9[i] - '0') * (10 - i)
+        val check = 11 - (sum % 11)
+        return when (check) {
+            11 -> 0
+            10 -> -1 // invalid: no NHS number uses a check digit of 10
+            else -> check
+        }
+    }
+
+    /** Validate a 10-digit NHS number by its mod-11 check digit. */
+    fun isValidNhs(nhs: String): Boolean {
+        if (nhs.length != 10 || !nhs.all { it in '0'..'9' }) return false
+        val check = nhsCheckDigit(nhs.substring(0, 9))
+        return check >= 0 && check == nhs[9] - '0'
+    }
+
     /** ISIN (ISO 6166) check digit: letters expand to two digits (A=10..Z=35), then Luhn over the string. */
     fun isinCheckDigit(first11: String): Int = luhnCheckDigit(expandIsin(first11))
 
