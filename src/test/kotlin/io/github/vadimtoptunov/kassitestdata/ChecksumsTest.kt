@@ -113,6 +113,16 @@ class ChecksumsTest {
     }
 
     @Test
+    fun `NPI check digit reference (CMS published example)`() {
+        // External anchor: the worked example from the CMS NPI check-digit specification
+        // (https://www.cms.gov/ ... NPIcheckdigit.pdf) — identifier 123456789 → NPI 1234567893.
+        assertEquals(3, Checksums.npiCheckDigit("123456789"))
+        assertTrue(Checksums.isValidNpi("1234567893"))
+        assertFalse(Checksums.isValidNpi("1234567890")) // check digit off by one
+        assertFalse(Checksums.isValidNpi("123456789"))  // too short (9 digits)
+    }
+
+    @Test
     fun `ICAO 7-3-1 check digit reference`() {
         // Classic ICAO 9303 passport-number example: "L898902C" → check digit 3.
         assertEquals(3, Checksums.icao731CheckDigit("L898902C"))
