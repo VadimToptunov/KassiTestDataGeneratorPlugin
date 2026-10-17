@@ -92,6 +92,16 @@ object IdentifierGenerator {
         return if (valid) "$body$check" else "$body${(check + 1) % 10}"
     }
 
+    /** CAS Registry Number (chemistry): a 4–7-digit first block + 2-digit block + check digit, NNNN-NN-C. */
+    fun cas(rng: Rng, valid: Boolean): String {
+        val firstLen = 4 + rng.int(4) // 4..7 digits in the first block
+        val first = rng.digitsNonZeroLead(firstLen)
+        val second = rng.digits(2)
+        val check = Checksums.casCheckDigit(first + second)
+        val c = if (valid) check else (check + 1) % 10
+        return "$first-$second-$c"
+    }
+
     /** NHS number (UK): 9-digit body + mod-11 check digit, formatted NNN NNN NNNN. */
     fun nhs(rng: Rng, valid: Boolean): String {
         // Re-draw the body until it yields a usable check digit (a computed 10 is never issued).
