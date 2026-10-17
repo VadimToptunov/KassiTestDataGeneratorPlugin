@@ -116,6 +116,12 @@ object TestDataCatalog {
         items += CatalogItem("Identifier", "ISSN · Serial publication (ISO 3297) · valid") { seed ->
             IdentifierGenerator.issn(Rng(seed), valid = true)
         }
+        items += CatalogItem("Identifier", "NPI · US National Provider Identifier · valid") { seed ->
+            IdentifierGenerator.npi(Rng(seed), valid = true)
+        }
+        items += CatalogItem("Identifier", "NPI · US National Provider Identifier · invalid") { seed ->
+            IdentifierGenerator.npi(Rng(seed), valid = false)
+        }
         items += CatalogItem("Identifier", "ICCID · SIM card (Luhn) · valid") { seed ->
             IdentifierGenerator.iccid(Rng(seed), valid = true)
         }

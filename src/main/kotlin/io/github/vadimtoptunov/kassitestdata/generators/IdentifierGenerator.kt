@@ -92,6 +92,13 @@ object IdentifierGenerator {
         return if (valid) "$body$check" else "$body${(check + 1) % 10}"
     }
 
+    /** NPI (US National Provider Identifier): 9-digit identifier + Luhn check over the 80840 prefix. */
+    fun npi(rng: Rng, valid: Boolean): String {
+        val identifier = rng.digitsNonZeroLead(9)
+        val check = Checksums.npiCheckDigit(identifier)
+        return if (valid) "$identifier$check" else "$identifier${(check + 1) % 10}"
+    }
+
     /** ISO 6346 shipping-container code: 3-letter owner + category U + 6-digit serial + check digit. */
     fun containerCode(rng: Rng, valid: Boolean): String {
         val body = rng.upperLetters(3) + "U" + rng.digits(6)

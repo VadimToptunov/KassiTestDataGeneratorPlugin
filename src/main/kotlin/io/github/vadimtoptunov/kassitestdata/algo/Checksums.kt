@@ -93,6 +93,17 @@ object Checksums {
         return sum % 10 == 0
     }
 
+    // NPI (US National Provider Identifier): 10 digits; the check digit is Luhn over the 9-digit
+    // identifier prefixed by the fixed 80840 (the NPI "card issuer" prefix mandated for the check).
+    private const val NPI_PREFIX = "80840"
+
+    /** NPI check digit: Luhn over "80840" + the 9-digit identifier. */
+    fun npiCheckDigit(identifier9: String): Int = luhnCheckDigit(NPI_PREFIX + identifier9)
+
+    /** Validate a 10-digit NPI by its Luhn check digit (computed over the 80840 prefix). */
+    fun isValidNpi(npi: String): Boolean =
+        npi.length == 10 && npi.all { it in '0'..'9' } && isLuhnValid(NPI_PREFIX + npi)
+
     /** ISIN (ISO 6166) check digit: letters expand to two digits (A=10..Z=35), then Luhn over the string. */
     fun isinCheckDigit(first11: String): Int = luhnCheckDigit(expandIsin(first11))
 
