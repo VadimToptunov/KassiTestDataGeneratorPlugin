@@ -92,6 +92,20 @@ object IdentifierGenerator {
         return if (valid) "$body$check" else "$body${(check + 1) % 10}"
     }
 
+    /** NHS number (UK): 9-digit body + mod-11 check digit, formatted NNN NNN NNNN. */
+    fun nhs(rng: Rng, valid: Boolean): String {
+        // Re-draw the body until it yields a usable check digit (a computed 10 is never issued).
+        var body: String
+        var check: Int
+        do {
+            body = rng.digitsNonZeroLead(9)
+            check = Checksums.nhsCheckDigit(body)
+        } while (check < 0)
+        val c = if (valid) check else (check + 1) % 10
+        val digits = "$body$c"
+        return "${digits.substring(0, 3)} ${digits.substring(3, 6)} ${digits.substring(6, 10)}"
+    }
+
     /** NPI (US National Provider Identifier): 9-digit identifier + Luhn check over the 80840 prefix. */
     fun npi(rng: Rng, valid: Boolean): String {
         val identifier = rng.digitsNonZeroLead(9)

@@ -113,6 +113,16 @@ class ChecksumsTest {
     }
 
     @Test
+    fun `NHS number check digit reference (published example)`() {
+        // External anchor: 9434765919 is the valid NHS-number example published in the NHS Data
+        // Model and Dictionary / developer docs (weights 10..2, check = 11 - sum mod 11).
+        assertEquals(9, Checksums.nhsCheckDigit("943476591"))
+        assertTrue(Checksums.isValidNhs("9434765919"))
+        assertFalse(Checksums.isValidNhs("9434765918")) // check digit off by one
+        assertFalse(Checksums.isValidNhs("943476591"))  // too short (9 digits)
+    }
+
+    @Test
     fun `NPI check digit reference (CMS published example)`() {
         // External anchor: the worked example from the CMS NPI check-digit specification
         // (https://www.cms.gov/ ... NPIcheckdigit.pdf) — identifier 123456789 → NPI 1234567893.
