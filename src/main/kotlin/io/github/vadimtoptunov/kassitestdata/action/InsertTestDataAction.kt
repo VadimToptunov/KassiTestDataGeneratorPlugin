@@ -36,6 +36,7 @@ class InsertTestDataAction : AnAction() {
             WriteCommandAction.runWriteCommandAction(project) {
                 EditorModificationUtilEx.insertStringAtCaret(editor, text)
             }
+            reviewPrompt.recordUse(project)
         }
 
         val byGroup = TestDataCatalog.allItems().groupBy { it.group }
